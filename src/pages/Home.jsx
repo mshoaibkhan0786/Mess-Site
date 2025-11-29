@@ -113,7 +113,7 @@ const Home = () => {
                                         key={`rest-${index}`}
                                         href={`tel:${item.phone}`}
                                         whileHover={{ y: -5 }}
-                                        className="block p-6 rounded-2xl bg-white border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 group"
+                                        className="block p-6 rounded-2xl bg-white border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 group h-fit"
                                     >
                                         <div>
                                             <div className="flex justify-between items-start mb-4">
