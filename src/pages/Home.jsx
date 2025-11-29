@@ -158,9 +158,13 @@ const Home = () => {
                                 )
                             ))}
                             {displayItems.length === 0 && (
-                                <div className="col-span-full text-center py-12">
-                                    <p className="text-gray-500 text-lg">No messes found matching your search.</p>
-                                </div>
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="col-span-full text-center py-12"
+                                >
+                                    <p className="text-gray-500 text-lg animate-pulse">No messes found matching your search.</p>
+                                </motion.div>
                             )}
                         </motion.div>
                     )}
