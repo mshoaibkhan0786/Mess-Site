@@ -1,38 +1,3 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { messes } from '../data/menuData';
-import Navbar from '../components/Navbar';
-import { ArrowLeft, Clock, UtensilsCrossed, X } from 'lucide-react';
-import clsx from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-
-const MessDetail = () => {
-    const { id } = useParams();
-    const mess = messes.find(m => m.id === id);
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const transformComponentRef = React.useRef(null);
-    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
-    const [showTodayModal, setShowTodayModal] = React.useState(false);
-
-    React.useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handleResize);
-
-        // Save last viewed mess
-        if (id) {
-            localStorage.setItem('lastViewedMess', id);
-        }
-
-        return () => window.removeEventListener('resize', handleResize);
-    }, [id]);
-
-    if (!mess) {
-        return <div className="min-h-screen flex items-center justify-center">Mess not found</div>;
-    }
-
-    return (
-        <div className="min-h-screen bg-gray-50 relative">
             <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
                 <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -98,54 +63,54 @@ const MessDetail = () => {
                 </motion.div>
             </main>
 
-            {/* Today's Menu Modal */}
-            <AnimatePresence>
-                {showTodayModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowTodayModal(false)}>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
-                        >
-                            <div className={clsx("p-4 bg-gradient-to-r text-white flex justify-between items-center", mess.color)}>
-                                <h3 className="text-lg font-bold">Today's Menu ({new Date().toLocaleDateString('en-US', { weekday: 'long' })})</h3>
-                                <button onClick={() => setShowTodayModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="p-6 space-y-4">
-                                {(() => {
-                                    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-                                    const todayMenu = mess.menu[today] || mess.menu['Monday'];
-                                    return (
-                                        <>
-                                            <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
-                                                <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Breakfast}</p>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-green-50 border border-green-100">
-                                                <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Lunch}</p>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
-                                                <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Snacks}</p>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
-                                                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Dinner}</p>
-                                            </div>
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+{/* Today's Menu Modal */ }
+<AnimatePresence>
+    {showTodayModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowTodayModal(false)}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            >
+                <div className={clsx("p-4 bg-gradient-to-r text-white flex justify-between items-center", mess.color)}>
+                    <h3 className="text-lg font-bold">Today's Menu ({new Date().toLocaleDateString('en-US', { weekday: 'long' })})</h3>
+                    <button onClick={() => setShowTodayModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                        <X size={20} />
+                    </button>
+                </div>
+                <div className="p-6 space-y-4">
+                    {(() => {
+                        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+                        const todayMenu = mess.menu[today] || mess.menu['Monday'];
+                        return (
+                            <>
+                                <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
+                                    <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
+                                    <p className="text-gray-800 text-sm">{todayMenu.Breakfast}</p>
+                                </div>
+                                <div className="p-3 rounded-xl bg-green-50 border border-green-100">
+                                    <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
+                                    <p className="text-gray-800 text-sm">{todayMenu.Lunch}</p>
+                                </div>
+                                <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
+                                    <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
+                                    <p className="text-gray-800 text-sm">{todayMenu.Snacks}</p>
+                                </div>
+                                <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+                                    <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
+                                    <p className="text-gray-800 text-sm">{todayMenu.Dinner}</p>
+                                </div>
+                            </>
+                        );
+                    })()}
+                </div>
+            </motion.div>
         </div>
+    )}
+</AnimatePresence>
+        </div >
     );
 };
 

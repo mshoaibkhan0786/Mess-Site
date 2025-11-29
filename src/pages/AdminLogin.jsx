@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
-import Navbar from '../components/Navbar';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const AdminLogin = () => {
+    const [email, setEmail] = useState('admin@mitmess.com');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        if (password === 'admin') {
+        setLoading(true);
+        setError('');
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
             navigate('/admin/dashboard');
-        } else {
+        } catch (err) {
+            console.error("Login error:", err);
             setError('Invalid password');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -67,9 +72,10 @@ const AdminLogin = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                            disabled={loading}
+                            className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            Login <ArrowRight size={20} />
+                            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <>Login <ArrowRight size={20} /></>}
                         </button>
                     </form>
                 </motion.div>

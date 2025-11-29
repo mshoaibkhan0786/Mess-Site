@@ -1,13 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, CheckCircle, Loader2, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
-import { messes } from '../data/menuData';
+import { db, auth } from '../firebase';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-    const [selectedMess, setSelectedMess] = useState(messes[0].id);
+    const [messes, setMesses] = useState([]);
+    const [selectedMess, setSelectedMess] = useState('');
     const [isDragging, setIsDragging] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, processing, success
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                navigate('/admin');
+            }
+        });
+
+        const fetchMesses = async () => {
+            const querySnapshot = await getDocs(collection(db, "messes"));
+            const messesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setMesses(messesData);
+            if (messesData.length > 0) {
+                setSelectedMess(messesData[0].id);
+            }
+        };
+        fetchMesses();
+
+        return () => unsubscribe();
+    }, [navigate]);
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -31,11 +56,30 @@ const AdminDashboard = () => {
         setUploadStatus('uploading');
 
         // Simulate upload and AI processing
-        setTimeout(() => {
+        setTimeout(async () => {
             setUploadStatus('processing');
-            setTimeout(() => {
+
+            // SIMULATED AI PARSING RESULT (For Demo)
+            // In a real app, this would come from the backend/AI service
+            const newMenu = {
+                Monday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
+                Tuesday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
+                Wednesday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
+                Thursday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
+                Friday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
+                Saturday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
+                Sunday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" }
+            };
+
+            try {
+                const messRef = doc(db, "messes", selectedMess);
+                await updateDoc(messRef, { menu: newMenu });
                 setUploadStatus('success');
-            }, 2500);
+            } catch (error) {
+                console.error("Error updating menu:", error);
+                setUploadStatus('idle'); // Reset on error
+                alert("Failed to update menu");
+            }
         }, 1500);
     };
 

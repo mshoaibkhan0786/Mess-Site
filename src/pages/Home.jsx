@@ -49,22 +49,6 @@ const Home = () => {
                     >
                         {sortedMesses.map((mess) => (
                             <MessCard key={mess.id} mess={mess} />
-                        ))}
-                        {sortedMesses.length === 0 && (
-                            <div className="col-span-full text-center py-12">
-                                <p className="text-gray-500 text-lg">No messes found matching your search.</p>
-                            </div>
-                        )}
-                    </motion.div>
-                </div>
-
-                <footer className="text-center py-8 mt-8 border-t border-gray-200/50">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight mb-2">
-                        What's on the <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">Menu?</span>
-                    </h1>
-                    <p className="text-gray-600 max-w-2xl mx-auto px-4">
-                        Daily menus for all hostel messes. Click a card for the full weekly schedule.
-                    </p>
                 </footer>
             </main>
         </div>
