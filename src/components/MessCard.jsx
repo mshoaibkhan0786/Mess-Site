@@ -10,7 +10,13 @@ const MessCard = ({ mess }) => {
     const currentDayMenu = mess.menu[selectedDay] || mess.menu['Monday'];
 
     const getSpecialItem = (menu) => {
-        const specialKeywords = ['chicken', 'paneer', 'egg', 'sewaiya', 'kebab', 'ice cream'];
+        // Priority check for Month End Dinner
+        const allItems = [menu.Breakfast, menu.Lunch, menu.Snacks, menu.Dinner].join(' ').toLowerCase();
+        if (allItems.includes('month end dinner')) {
+            return "Month End Dinner";
+        }
+
+        const specialKeywords = ['chicken', 'paneer', 'egg', 'sewaiya', 'kebab', 'ice cream', 'semiyan', 'kheer', 'swiss roll', 'gulab jamun'];
         const excludedKeywords = ['chapati', 'steam rice', 'steamed rice', 'rice'];
 
         const checkItem = (itemStr) => {
