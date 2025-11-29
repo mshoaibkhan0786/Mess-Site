@@ -11,7 +11,15 @@
 </head>
 
 <body>
-  <script>console.log("Index HTML loaded");</script>
+  <script>
+    window.onerror = function (msg, url, line, col, error) {
+      document.body.innerHTML += '<div style="color:red;z-index:9999;position:relative;background:white;padding:20px;font-family:monospace;">' +
+        '<h3>Global Error:</h3>' + msg + '<br>' + url + ':' + line + ':' + col + '<br>' + (error ? error.stack : '') + '</div>';
+      console.error("Global error:", msg, url, line, col, error);
+      return false;
+    };
+    console.log("Index HTML loaded & Error Handler Attached");
+  </script>
   <div id="root"></div>
 </body>
 
