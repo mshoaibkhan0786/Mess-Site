@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { X, Shield, UserPlus, AlertTriangle, Trash2, Lock } from 'lucide-react';
+import { X, Shield, UserPlus, AlertTriangle, Trash2, Lock, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AccessCodeManager = ({ onClose }) => {
@@ -14,6 +14,7 @@ const AccessCodeManager = ({ onClose }) => {
     const [selectedMess, setSelectedMess] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [selectedUser, setSelectedUser] = useState(null); // For detail view
 
     useEffect(() => {
         const fetchData = async () => {
@@ -87,6 +88,7 @@ const AccessCodeManager = ({ onClose }) => {
             // Soft delete: Remove from Firestore. Auth user remains but login is blocked by AdminLogin check.
             await deleteDoc(doc(db, "users", userId));
             setUsers(users.filter(user => user.id !== userId));
+            setSelectedUser(null); // Close modal if open
             alert(`Admin "${userName}" deleted successfully.`);
         } catch (err) {
             console.error("Delete Error:", err);
@@ -197,37 +199,28 @@ const AccessCodeManager = ({ onClose }) => {
                         <div className="overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
                             <div className="space-y-3">
                                 {users.map(user => (
-                                    <div key={user.id} className="p-4 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all">
-                                        <div className="flex justify-between items-start mb-2">
+                                    <div
+                                        key={user.id}
+                                        onClick={() => setSelectedUser(user)}
+                                        className="p-4 rounded-xl border border-gray-200 bg-gray-50 hover:bg-white hover:shadow-md transition-all cursor-pointer group"
+                                    >
+                                        <div className="flex justify-between items-center">
                                             <div>
-                                                <h5 className="font-bold text-gray-900">{user.name || "Unnamed Admin"}</h5>
-                                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${user.role === 'super_admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                                                    }`}>
-                                                    {user.role === 'super_admin' ? 'Super Admin' : 'Mess Admin'}
-                                                </span>
-                                            </div>
-                                            <button
-                                                onClick={() => handleDeleteUser(user.id, user.name)}
-                                                className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded"
-                                                title="Delete Admin"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-
-                                        <div className="space-y-1 text-sm text-gray-600">
-                                            <div className="flex items-center gap-2">
-                                                <Lock size={14} className="text-gray-400" />
-                                                <span className="font-mono bg-gray-200 px-1.5 rounded text-xs">{user.accessCode || "Hidden"}</span>
-                                            </div>
-                                            {user.messId && (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs text-gray-500">Mess:</span>
-                                                    <span>{messes.find(m => m.id === user.messId)?.name || user.messId}</span>
+                                                <h5 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{user.name || "Unnamed Admin"}</h5>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${user.role === 'super_admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                                                        }`}>
+                                                        {user.role === 'super_admin' ? 'Super Admin' : 'Mess Admin'}
+                                                    </span>
+                                                    {user.messId && (
+                                                        <span className="text-xs text-gray-500">
+                                                            • {messes.find(m => m.id === user.messId)?.name || user.messId}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            )}
-                                            <div className="text-xs text-gray-400 mt-2">
-                                                {user.email}
+                                            </div>
+                                            <div className="text-gray-400">
+                                                <ArrowRight size={16} />
                                             </div>
                                         </div>
                                     </div>
@@ -240,6 +233,65 @@ const AccessCodeManager = ({ onClose }) => {
                     </div>
                 </div>
             </motion.div>
+
+            {/* User Detail Modal */}
+            {selectedUser && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100"
+                    >
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="text-lg font-bold text-gray-900">Admin Profile</h3>
+                            <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</label>
+                                <p className="text-lg font-medium text-gray-900">{selectedUser.name || "N/A"}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</label>
+                                    <p className="text-sm font-medium text-gray-900 capitalize">{selectedUser.role.replace('_', ' ')}</p>
+                                </div>
+                                {selectedUser.messId && (
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Mess</label>
+                                        <p className="text-sm font-medium text-gray-900">{messes.find(m => m.id === selectedUser.messId)?.name || selectedUser.messId}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Access Code (Password)</label>
+                                <div className="flex items-center gap-2">
+                                    <Lock size={14} className="text-orange-500" />
+                                    <p className="font-mono text-lg font-bold text-gray-900">{selectedUser.accessCode}</p>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-2 break-all">{selectedUser.email}</p>
+                            </div>
+
+                            {selectedUser.accessCode === "LALA HI LALA" ? (
+                                <div className="bg-purple-50 text-purple-700 p-3 rounded-lg text-sm text-center font-medium border border-purple-100">
+                                    👑 Owner Account (Protected)
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => handleDeleteUser(selectedUser.id, selectedUser.name)}
+                                    className="w-full py-3 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Trash2 size={18} /> Delete Admin
+                                </button>
+                            )}
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
