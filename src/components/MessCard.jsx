@@ -55,12 +55,24 @@ const MessCard = ({ mess }) => {
         return lunchSpecial || dinnerSpecial || "Special Meal";
     };
 
+    const shadowMap = {
+        annapoorna: 'hover:shadow-orange-500/40',
+        fc1: 'hover:shadow-blue-500/40',
+        fc2: 'hover:shadow-green-500/40',
+        ananya: 'hover:shadow-pink-500/40'
+    };
+
+    const shadowClass = shadowMap[mess.id] || 'hover:shadow-orange-500/40';
+
     return (
         <Link to={`/mess/${mess.id}`} className="h-[32rem] block">
             <motion.div
                 layout
                 whileHover={{ y: -5, transition: { duration: 0.1 } }}
-                className="relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-100 cursor-pointer group h-full flex flex-col"
+                className={clsx(
+                    "relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-100 cursor-pointer group h-full flex flex-col",
+                    shadowClass
+                )}
             >
                 {/* Header */}
                 <div className={clsx("px-5 py-3 bg-gradient-to-r text-white transition-all duration-300", mess.color)}>
