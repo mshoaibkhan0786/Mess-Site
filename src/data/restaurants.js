@@ -1,0 +1,15 @@
+export const restaurants = [
+    { name: "Taco House", phone: "+91 7795815315" },
+    { name: "Hungry House", phone: "+91 9820243177" },
+    { name: "MFC", phone: "+91 7338334970" },
+    { name: "Hit&Run", phone: "+91 7406330088" },
+    { name: "Janani Canteen", phone: "+91 8660138488" },
+    { name: "Dollar Cafe", phone: "+91 8105306109" },
+    { name: "Kamath Cafe", phone: "+91 8217044886" },
+    { name: "Aditya Mess", phone: "+91 7483644586" },
+    { name: "Apoorva Mess", phone: "+91 9108888320" },
+    { name: "FC 2", phone: "+91 8861953102" },
+    { name: "Poornima", phone: "+91 7090641985" },
+    { name: "Nom Nom cafe", phone: "+91 7619422026" },
+    { name: "Ashraya", phone: "+91 6361201519" },
+];

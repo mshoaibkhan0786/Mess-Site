@@ -3,25 +3,16 @@ import { UtensilsCrossed, Search, X, Map, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { restaurants } from '../data/restaurants';
+
 const Navbar = ({ searchTerm, setSearchTerm }) => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [showRestaurantsModal, setShowRestaurantsModal] = useState(false);
+    const [restaurantSearch, setRestaurantSearch] = useState('');
 
-    const restaurants = [
-        { name: "Taco House", phone: "+91 7795815315" },
-        { name: "Hungry House", phone: "+91 9820243177" },
-        { name: "MFC", phone: "+91 7338334970" },
-        { name: "Hit&Run", phone: "+91 7406330088" },
-        { name: "Janani Canteen", phone: "+91 8660138488" },
-        { name: "Dollar Cafe", phone: "+91 8105306109" },
-        { name: "Kamath Cafe", phone: "+91 8217044886" },
-        { name: "Aditya Mess", phone: "+91 7483644586" },
-        { name: "Apoorva Mess", phone: "+91 9108888320" },
-        { name: "FC 2", phone: "+91 8861953102" },
-        { name: "Poornima", phone: "+91 70906 41985" },
-        { name: "Nom Nom cafe", phone: "+91 7619422026" },
-        { name: "Ashraya", phone: "+91 6361201519" },
-    ];
+    const filteredRestaurants = restaurants
+        .filter(r => r.name.toLowerCase().includes(restaurantSearch.toLowerCase()))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     return (
         <>
@@ -156,18 +147,30 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                             onClick={(e) => e.stopPropagation()}
                             className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col"
                         >
-                            <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 text-white flex justify-between items-center shrink-0">
-                                <div>
-                                    <h3 className="text-2xl font-bold">Nearby Restaurants</h3>
-                                    <p className="text-white/80 text-sm">Tap a card to call</p>
+                            <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 text-white shrink-0">
+                                <div className="flex justify-between items-center mb-4">
+                                    <div>
+                                        <h3 className="text-2xl font-bold">Nearby Restaurants</h3>
+                                        <p className="text-white/80 text-sm">Tap a card to call</p>
+                                    </div>
+                                    <button onClick={() => setShowRestaurantsModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+                                        <X size={24} />
+                                    </button>
                                 </div>
-                                <button onClick={() => setShowRestaurantsModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
-                                    <X size={24} />
-                                </button>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-orange-500" size={18} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search restaurants..."
+                                        value={restaurantSearch}
+                                        onChange={(e) => setRestaurantSearch(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                    />
+                                </div>
                             </div>
                             <div className="p-6 overflow-y-auto">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {restaurants.map((restaurant, index) => (
+                                    {filteredRestaurants.map((restaurant, index) => (
                                         <a
                                             key={index}
                                             href={`tel:${restaurant.phone}`}
