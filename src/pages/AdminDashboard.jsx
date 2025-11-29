@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, CheckCircle, Loader2, FileText } from 'lucide-react';
+import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { db, auth } from '../firebase';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,7 +13,22 @@ const AdminDashboard = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, processing, success, error
     const [errorMessage, setErrorMessage] = useState('');
+
+    // New State for Add Mess
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [newMessName, setNewMessName] = useState('');
+    const [newMessColor, setNewMessColor] = useState('from-orange-500 to-red-500'); // Default color
+
     const navigate = useNavigate();
+
+    const fetchMesses = async () => {
+        const querySnapshot = await getDocs(collection(db, "messes"));
+        const messesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setMesses(messesData);
+        if (messesData.length > 0 && !selectedMess) {
+            setSelectedMess(messesData[0].id);
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -21,17 +36,7 @@ const AdminDashboard = () => {
                 navigate('/admin');
             }
         });
-
-        const fetchMesses = async () => {
-            const querySnapshot = await getDocs(collection(db, "messes"));
-            const messesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setMesses(messesData);
-            if (messesData.length > 0) {
-                setSelectedMess(messesData[0].id);
-            }
-        };
         fetchMesses();
-
         return () => unsubscribe();
     }, [navigate]);
 
@@ -50,6 +55,57 @@ const AdminDashboard = () => {
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             handleUpload(files[0]);
+        }
+    };
+
+    const handleAddMess = async (e) => {
+        e.preventDefault();
+        if (!newMessName) return;
+
+        try {
+            const emptyMenu = {
+                Monday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Tuesday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Wednesday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Thursday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Friday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Saturday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Sunday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" }
+            };
+
+            const docRef = await addDoc(collection(db, "messes"), {
+                name: newMessName,
+                color: newMessColor,
+                menu: emptyMenu
+            });
+
+            setNewMessName('');
+            setShowAddModal(false);
+            await fetchMesses();
+            setSelectedMess(docRef.id);
+            alert("Mess added successfully!");
+        } catch (error) {
+            console.error("Error adding mess: ", error);
+            alert("Failed to add mess.");
+        }
+    };
+
+    const handleDeleteMess = async () => {
+        if (!selectedMess) return;
+        if (window.confirm("Are you sure you want to delete this mess? This action cannot be undone.")) {
+            try {
+                await deleteDoc(doc(db, "messes", selectedMess));
+                await fetchMesses();
+                if (messes.length > 1) {
+                    setSelectedMess(messes[0].id === selectedMess ? messes[1].id : messes[0].id);
+                } else {
+                    setSelectedMess('');
+                }
+                alert("Mess deleted successfully.");
+            } catch (error) {
+                console.error("Error deleting mess: ", error);
+                alert("Failed to delete mess.");
+            }
         }
     };
 
@@ -75,7 +131,23 @@ const AdminDashboard = () => {
 
                     const prompt = `
                     Extract the weekly menu from this image and return it as a strictly valid JSON object.
-                        ... and so on for all 7 days.
+                    
+                    CRITICAL INSTRUCTION: You must extract EVERY SINGLE DISH listed for each meal. 
+                    - Do NOT summarize. 
+                    - Do NOT truncate. 
+                    - List all items separated by commas exactly as they appear in the image.
+                    - If there are multiple items (e.g., "Rice, Dal, Curd"), include ALL of them.
+                    - **IMPORTANT: Format all text in Sentence case (e.g., "Paneer butter masala", "Mix veg paratha"). Do NOT use ALL CAPS.**
+
+                    The JSON structure must be exactly like this:
+                    {
+                        "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                        "Tuesday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                        "Wednesday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                        "Thursday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                        "Friday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                        "Saturday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                        "Sunday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." }
                     }
                     If a meal is missing, use "N/A".
                     Do not include any markdown formatting (like \`\`\`json), just the raw JSON string.
@@ -152,17 +224,33 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className="p-8">
-                        <div className="mb-8">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Select Mess</label>
-                            <select
-                                value={selectedMess}
-                                onChange={(e) => setSelectedMess(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none bg-white/50"
+                        <div className="mb-8 flex items-end gap-4">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Select Mess</label>
+                                <select
+                                    value={selectedMess}
+                                    onChange={(e) => setSelectedMess(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none bg-white/50"
+                                >
+                                    {messes.map(mess => (
+                                        <option key={mess.id} value={mess.id}>{mess.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button
+                                onClick={() => setShowAddModal(true)}
+                                className="p-3 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                                title="Add New Mess"
                             >
-                                {messes.map(mess => (
-                                    <option key={mess.id} value={mess.id}>{mess.name}</option>
-                                ))}
-                            </select>
+                                <Plus size={24} />
+                            </button>
+                            <button
+                                onClick={handleDeleteMess}
+                                className="p-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                                title="Delete Selected Mess"
+                            >
+                                <Trash2 size={24} />
+                            </button>
                         </div>
 
                         <AnimatePresence mode="wait">
@@ -278,6 +366,69 @@ const AdminDashboard = () => {
                     </div>
                 </motion.div>
             </main>
+
+            {/* Add Mess Modal */}
+            <AnimatePresence>
+                {showAddModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-gray-900">Add New Mess</h3>
+                                <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
+                                    <X size={24} />
+                                </button>
+                            </div>
+                            <form onSubmit={handleAddMess} className="p-6 space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Mess Name</label>
+                                    <input
+                                        type="text"
+                                        value={newMessName}
+                                        onChange={(e) => setNewMessName(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"
+                                        placeholder="e.g., New Hostel Mess"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Theme Color</label>
+                                    <select
+                                        value={newMessColor}
+                                        onChange={(e) => setNewMessColor(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"
+                                    >
+                                        <option value="from-orange-500 to-red-500">Orange (Default)</option>
+                                        <option value="from-blue-500 to-cyan-500">Blue</option>
+                                        <option value="from-green-500 to-emerald-500">Green</option>
+                                        <option value="from-purple-500 to-pink-500">Purple</option>
+                                        <option value="from-pink-500 to-rose-500">Pink</option>
+                                    </select>
+                                </div>
+                                <div className="pt-4 flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                                    >
+                                        Create Mess
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
