@@ -136,9 +136,21 @@ const AdminDashboard = () => {
                                         Drag & Drop Menu Image
                                     </h3>
                                     <p className="text-gray-500 mb-6">or click to browse files</p>
-                                    <button className="px-6 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors shadow-sm">
+                                    <input
+                                        type="file"
+                                        id="file-upload"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files.length > 0) handleUpload(e.target.files[0]);
+                                        }}
+                                        accept="image/*"
+                                    />
+                                    <label
+                                        htmlFor="file-upload"
+                                        className="px-6 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+                                    >
                                         Browse Files
-                                    </button>
+                                    </label>
                                 </motion.div>
                             )}
 
