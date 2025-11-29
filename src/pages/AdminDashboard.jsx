@@ -5,132 +5,9 @@ import Navbar from '../components/Navbar';
 import { db, auth } from '../firebase';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
-
-const AdminDashboard = () => {
-    const [messes, setMesses] = useState([]);
-    const [selectedMess, setSelectedMess] = useState('');
-    const [isDragging, setIsDragging] = useState(false);
-    const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, processing, success
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                navigate('/admin');
-            }
-        });
-
-        const fetchMesses = async () => {
-            const querySnapshot = await getDocs(collection(db, "messes"));
-            const messesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setMesses(messesData);
-            if (messesData.length > 0) {
-                setSelectedMess(messesData[0].id);
-            }
-        };
-        fetchMesses();
-
-        return () => unsubscribe();
-    }, [navigate]);
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleUpload(files[0]);
-        }
-    };
-
-    const handleUpload = async (file) => {
-        setUploadStatus('uploading');
-
-        try {
-            // 1. Convert file to Base64
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                const base64Data = reader.result.split(',')[1];
-
-                setUploadStatus('processing');
-
-                try {
-                    // 2. Call Gemini API with Timeout
-                    const { GoogleGenerativeAI } = await import("@google/generative-ai");
-                    const genAI = new GoogleGenerativeAI("AIzaSyBiZukqBjGS2nd2lyyVTCle02aHth6jrLQ");
-                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
-
-                    const prompt = `
-                    Extract the weekly menu from this image and return it as a strictly valid JSON object.
-                    The JSON structure must be exactly like this:
-                    {
-                        "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
-                        "Tuesday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
-                        ... and so on for all 7 days.
-                    }
-                    If a meal is missing, use "N/A".
-                    Do not include any markdown formatting (like \`\`\`json), just the raw JSON string.
-                    `;
-
-                    // Timeout Promise
-                    const timeout = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error("Request timed out (30s)")), 30000)
-                    );
-
-                    // API Call Promise
-                    const apiCall = model.generateContent([
-                        prompt,
-                        {
-                            inlineData: {
-                                data: base64Data,
-                                mimeType: file.type
-                            }
-                        }
-                    ]);
-
-                    const result = await Promise.race([apiCall, timeout]);
-
-                    const response = await result.response;
-                    const text = response.text();
-                    console.log("Gemini Response:", text); // Debug log
-
-                    // Clean up the response if it contains markdown code blocks
-                    const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const newMenu = JSON.parse(cleanJson);
-
-                    // 3. Update Firestore
-                    const messRef = doc(db, "messes", selectedMess);
-                    await updateDoc(messRef, { menu: newMenu });
-                    setUploadStatus('success');
-                } catch (innerError) {
-                    console.error("Gemini/Firestore Error:", innerError);
-                    setUploadStatus('idle');
-                    alert(`Failed: ${innerError.message || "Unknown error"}. Check console.`);
-                }
-            };
-        } catch (error) {
-            console.error("File Reading Error:", error);
-            setUploadStatus('idle');
-            alert("Failed to read file.");
-        }
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50 relative">
-            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
                 <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-            </div>
+            </div >
 
             <Navbar />
 
@@ -248,11 +125,31 @@ const AdminDashboard = () => {
                                     </button>
                                 </motion.div>
                             )}
+                            {uploadStatus === 'error' && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="border border-red-200 bg-red-50/50 rounded-2xl p-8 text-center"
+                                >
+                                    <h3 className="text-xl font-semibold text-red-900 mb-2">
+                                        Upload Failed
+                                    </h3>
+                                    <p className="text-red-600 mb-6 font-mono text-sm bg-red-100 p-3 rounded">
+                                        {errorMessage}
+                                    </p>
+                                    <button
+                                        onClick={() => setUploadStatus('idle')}
+                                        className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors shadow-lg"
+                                    >
+                                        Try Again
+                                    </button>
+                                </motion.div>
+                            )}
                         </AnimatePresence>
                     </div>
                 </motion.div>
             </main>
-        </div>
+        </div >
     );
 };
 
