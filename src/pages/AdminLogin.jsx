@@ -1,22 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { auth } from '../firebase';
-import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from '../firebase';
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('admin@mitmess.com');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true); // Start with loading true to check auth
     const navigate = useNavigate();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                navigate('/admin/dashboard');
+                // Double check if user still exists in DB (in case they were deleted while logged in)
+                const userDoc = await getDoc(doc(db, "users", user.email));
+                if (userDoc.exists()) {
+                    navigate('/admin/dashboard');
+                } else {
+                    await signOut(auth);
+                    setLoading(false);
+                }
             } else {
                 setLoading(false); // Only show form if no user
             }
@@ -30,11 +39,19 @@ const AdminLogin = () => {
         setError('');
         try {
             await setPersistence(auth, browserLocalPersistence);
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+            // Check if user document exists (Soft Delete check)
+            const userDoc = await getDoc(doc(db, "users", userCredential.user.email));
+            if (!userDoc.exists()) {
+                await signOut(auth);
+                throw new Error("Access Denied: Account has been revoked.");
+            }
+
             // Navigation handled by useEffect
         } catch (err) {
             console.error("Login error:", err);
-            setError('Invalid password');
+            setError(err.message === "Access Denied: Account has been revoked." ? err.message : 'Invalid password');
             setLoading(false);
         }
     };
@@ -81,7 +98,7 @@ const AdminLogin = () => {
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
@@ -89,10 +106,17 @@ const AdminLogin = () => {
                                         const sanitizedCode = e.target.value.trim().replace(/\s+/g, '_').toLowerCase();
                                         setEmail(`${sanitizedCode}@mitmess.com`);
                                     }}
-                                    className="w-full pl-10 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
+                                    className="w-full pl-10 pr-10 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
                                     placeholder="Enter your secret code"
                                     autoFocus
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
                             </div>
                             {error && <p className="text-red-500 text-sm mt-2 ml-1">{error}</p>}
                         </div>
