@@ -18,8 +18,14 @@ const MessDetail = () => {
     React.useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
+
+        // Save last viewed mess
+        if (id) {
+            localStorage.setItem('lastViewedMess', id);
+        }
+
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [id]);
 
     if (!mess) {
         return <div className="min-h-screen flex items-center justify-center">Mess not found</div>;

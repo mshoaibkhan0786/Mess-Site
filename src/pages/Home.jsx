@@ -21,6 +21,15 @@ const Home = () => {
         );
     });
 
+    // Sort messes to put last viewed on top
+    const sortedMesses = [...filteredMesses].sort((a, b) => {
+        const lastViewed = localStorage.getItem('lastViewedMess');
+        if (!lastViewed) return 0;
+        if (a.id === lastViewed) return -1;
+        if (b.id === lastViewed) return 1;
+        return 0;
+    });
+
     return (
         <div className="min-h-screen bg-gray-50 relative selection:bg-orange-200 selection:text-orange-900">
             {/* Background Elements */}
@@ -38,10 +47,10 @@ const Home = () => {
                         layout
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8"
                     >
-                        {filteredMesses.map((mess) => (
+                        {sortedMesses.map((mess) => (
                             <MessCard key={mess.id} mess={mess} />
                         ))}
-                        {filteredMesses.length === 0 && (
+                        {sortedMesses.length === 0 && (
                             <div className="col-span-full text-center py-12">
                                 <p className="text-gray-500 text-lg">No messes found matching your search.</p>
                             </div>
