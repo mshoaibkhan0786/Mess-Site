@@ -52,35 +52,62 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleUpload = (file) => {
+    const handleUpload = async (file) => {
         setUploadStatus('uploading');
 
-        // Simulate upload and AI processing
-        setTimeout(async () => {
-            setUploadStatus('processing');
+        try {
+            // 1. Convert file to Base64
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const base64Data = reader.result.split(',')[1];
 
-            // SIMULATED AI PARSING RESULT (For Demo)
-            // In a real app, this would come from the backend/AI service
-            const newMenu = {
-                Monday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
-                Tuesday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
-                Wednesday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
-                Thursday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
-                Friday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
-                Saturday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" },
-                Sunday: { Breakfast: "Updated Item 1", Lunch: "Updated Item 2", Snacks: "Updated Item 3", Dinner: "Updated Item 4" }
-            };
+                setUploadStatus('processing');
 
-            try {
+                // 2. Call Gemini API
+                const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                const genAI = new GoogleGenerativeAI("AIzaSyBiZukqBjGS2nd2lyyVTCle02aHth6jrLQ");
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+                const prompt = `
+                Extract the weekly menu from this image and return it as a strictly valid JSON object.
+                The JSON structure must be exactly like this:
+                {
+                    "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                    "Tuesday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                    ... and so on for all 7 days.
+                }
+                If a meal is missing, use "N/A".
+                Do not include any markdown formatting (like \`\`\`json), just the raw JSON string.
+                `;
+
+                const result = await model.generateContent([
+                    prompt,
+                    {
+                        inlineData: {
+                            data: base64Data,
+                            mimeType: file.type
+                        }
+                    }
+                ]);
+
+                const response = await result.response;
+                const text = response.text();
+
+                // Clean up the response if it contains markdown code blocks
+                const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const newMenu = JSON.parse(cleanJson);
+
+                // 3. Update Firestore
                 const messRef = doc(db, "messes", selectedMess);
                 await updateDoc(messRef, { menu: newMenu });
                 setUploadStatus('success');
-            } catch (error) {
-                console.error("Error updating menu:", error);
-                setUploadStatus('idle'); // Reset on error
-                alert("Failed to update menu");
-            }
-        }, 1500);
+            };
+        } catch (error) {
+            console.error("Error processing menu:", error);
+            setUploadStatus('idle');
+            alert("Failed to process menu. Please try again.");
+        }
     };
 
     return (
