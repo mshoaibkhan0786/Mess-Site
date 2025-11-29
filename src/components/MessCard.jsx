@@ -64,6 +64,11 @@ const MessCard = ({ mess }) => {
 
     const shadowClass = shadowMap[mess.id] || 'hover:shadow-orange-500/40';
 
+    const toTitleCase = (str) => {
+        if (!str) return '';
+        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
+
     return (
         <Link to={`/mess/${mess.id}`} className="h-[32rem] block">
             <motion.div
@@ -84,7 +89,7 @@ const MessCard = ({ mess }) => {
                     </div>
                     <p className="mt-1 text-white/90 text-xs flex items-center gap-1">
                         <Clock size={12} />
-                        Today's Special: {getSpecialItem(currentDayMenu)}
+                        Today's Special: {toTitleCase(getSpecialItem(currentDayMenu))}
                     </p>
                 </div>
 
@@ -116,19 +121,19 @@ const MessCard = ({ mess }) => {
                     <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                         <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Breakfast?.toLowerCase()}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Breakfast)}</p>
                         </div>
                         <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Lunch?.toLowerCase()}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Lunch)}</p>
                         </div>
                         <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Snacks?.toLowerCase()}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Snacks)}</p>
                         </div>
                         <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Dinner?.toLowerCase()}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Dinner)}</p>
                         </div>
                     </div>
 
