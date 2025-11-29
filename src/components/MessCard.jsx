@@ -13,8 +13,8 @@ const MessCard = ({ mess }) => {
         <Link to={`/mess/${mess.id}`} className="h-[32rem] block">
             <motion.div
                 layout
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                className="relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer group h-full flex flex-col"
+                whileHover={{ y: -5, transition: { duration: 0.1 } }}
+                className="relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-100 cursor-pointer group h-full flex flex-col"
             >
                 {/* Header */}
                 <div className={clsx("px-5 py-3 bg-gradient-to-r text-white transition-all duration-300", mess.color)}>
