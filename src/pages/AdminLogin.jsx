@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Lock, ArrowRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth';
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('admin@mitmess.com');
@@ -18,6 +18,7 @@ const AdminLogin = () => {
         setLoading(true);
         setError('');
         try {
+            await setPersistence(auth, browserLocalPersistence);
             await signInWithEmailAndPassword(auth, email, password);
             navigate('/admin/dashboard');
         } catch (err) {
