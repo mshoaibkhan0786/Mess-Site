@@ -167,27 +167,36 @@ const MessDetail = () => {
                             className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
                         >
                             <div className={clsx("p-4 bg-gradient-to-r text-white flex justify-between items-center", mess.color)}>
+                                <h3 className="text-lg font-bold">Today's Menu ({new Date().toLocaleDateString('en-US', { weekday: 'long' })})</h3>
+                                <button onClick={() => setShowTodayModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {(() => {
+                                    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+                                    const todayMenu = mess.menu[today] || mess.menu['Monday'];
 
-                                return (
-                                <>
-                                    <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
-                                        <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
-                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Breakfast)}</p>
-                                    </div>
-                                    <div className="p-3 rounded-xl bg-green-50 border border-green-100">
-                                        <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
-                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Lunch)}</p>
-                                    </div>
-                                    <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
-                                        <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
-                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Snacks)}</p>
-                                    </div>
-                                    <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
-                                        <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
-                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Dinner)}</p>
-                                    </div>
-                                </>
-                                );
+                                    return (
+                                        <>
+                                            <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
+                                                <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Breakfast)}</p>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-green-50 border border-green-100">
+                                                <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Lunch)}</p>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
+                                                <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Snacks)}</p>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+                                                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Dinner)}</p>
+                                            </div>
+                                        </>
+                                    );
                                 })()}
                             </div>
                         </motion.div>
