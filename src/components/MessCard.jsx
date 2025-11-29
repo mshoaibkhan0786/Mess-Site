@@ -71,7 +71,6 @@ const MessCard = ({ mess }) => {
     };
 
     return (
-    return (
         <Link to={`/mess/${mess.id}`} className="h-auto md:h-[32rem] block">
             <motion.div
                 layout
