@@ -75,13 +75,23 @@ const AdminLogin = () => {
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Admin ID</label>
+                            <input
+                                type="text"
+                                value={email.replace('@mitmess.com', '')}
+                                onChange={(e) => setEmail(`${e.target.value}@mitmess.com`)}
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
+                                placeholder="e.g. admin, aditya, annapoorna"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Password</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
-                                placeholder="Password"
-                                autoFocus
+                                placeholder="Enter password"
                             />
                             {error && <p className="text-red-500 text-sm mt-2 ml-1">{error}</p>}
                         </div>
