@@ -4,14 +4,25 @@ import { motion } from 'framer-motion';
 import { Lock, ArrowRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged } from 'firebase/auth';
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('admin@mitmess.com');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // Start with loading true to check auth
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                navigate('/admin/dashboard');
+            } else {
+                setLoading(false); // Only show form if no user
+            }
+        });
+        return () => unsubscribe();
+    }, [navigate]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -20,11 +31,10 @@ const AdminLogin = () => {
         try {
             await setPersistence(auth, browserLocalPersistence);
             await signInWithEmailAndPassword(auth, email, password);
-            navigate('/admin/dashboard');
+            // Navigation handled by useEffect
         } catch (err) {
             console.error("Login error:", err);
             setError('Invalid password');
-        } finally {
             setLoading(false);
         }
     };
