@@ -190,8 +190,8 @@ const MessDetail = () => {
                     </div>
                         </motion.div>
         </div>
-                    </div >
-                )}
+    )
+}
             </AnimatePresence >
         </div >
     );
