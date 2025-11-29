@@ -18,6 +18,13 @@ const AdminLogin = () => {
         }
     };
 
+    const handleBackgroundClick = (e) => {
+        // Only redirect on mobile (width < 768px) and if clicking the background directly
+        if (window.innerWidth < 768 && e.target === e.currentTarget) {
+            navigate('/');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 relative flex flex-col">
             <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -27,11 +34,15 @@ const AdminLogin = () => {
 
             <Navbar />
 
-            <div className="flex-1 flex items-center justify-center relative z-10 px-4">
+            <div
+                className="flex-1 flex items-center justify-center relative z-10 px-4 cursor-pointer md:cursor-default"
+                onClick={handleBackgroundClick}
+            >
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/50"
+                    className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/50 cursor-default"
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <div className="text-center mb-8">
                         <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
