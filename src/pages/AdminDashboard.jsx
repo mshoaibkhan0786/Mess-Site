@@ -16,6 +16,7 @@ const AdminDashboard = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [userRole, setUserRole] = useState(null); // 'super_admin' | 'mess_admin'
     const [assignedMessId, setAssignedMessId] = useState(null);
+    const [adminName, setAdminName] = useState(''); // Store logged-in admin's name
 
     // New State for Add Mess
     const [showAddModal, setShowAddModal] = useState(false);
@@ -48,7 +49,8 @@ const AdminDashboard = () => {
                 action,
                 details,
                 messId,
-                adminEmail: auth.currentUser?.email || 'unknown'
+                adminEmail: auth.currentUser?.email || 'unknown',
+                adminName: adminName || 'Unknown Admin'
             });
         } catch (error) {
             console.error("Failed to log action:", error);
@@ -76,6 +78,7 @@ const AdminDashboard = () => {
                 const userData = userDoc.data();
                 setUserRole(userData.role);
                 setAssignedMessId(userData.messId);
+                setAdminName(userData.name || 'Unknown Admin'); // Set admin name
                 if (userData.role === 'mess_admin' && userData.messId) {
                     setSelectedMess(userData.messId);
                 }
@@ -85,6 +88,7 @@ const AdminDashboard = () => {
                 // Better to be restrictive:
                 console.warn("User not found in users collection, defaulting to restricted access.");
                 setUserRole('mess_admin');
+                setAdminName('Unknown Admin');
             }
         } catch (error) {
             console.error("Error fetching user role:", error);
@@ -104,6 +108,27 @@ const AdminDashboard = () => {
             setLoadingHistory(false);
         }
     };
+    // ... (lines 108-587)
+    <div className="space-y-4">
+        {auditLogs.map(log => (
+            <div key={log.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="mt-1">
+                    <div className="bg-white p-2 rounded-full shadow-sm">
+                        <Clock size={16} className="text-gray-500" />
+                    </div>
+                </div>
+                <div>
+                    <p className="font-medium text-gray-900">{log.details}</p>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                        <span className="font-semibold text-orange-600">{log.adminName || log.adminEmail}</span>
+                        {log.adminName && <span className="text-gray-400">({log.adminEmail})</span>}
+                        <span>•</span>
+                        <span>{new Date(log.timestamp).toLocaleString()}</span>
+                    </div>
+                </div>
+            </div>
+        ))}
+    </div>
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -595,7 +620,8 @@ const AdminDashboard = () => {
                                                 <div>
                                                     <p className="font-medium text-gray-900">{log.details}</p>
                                                     <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                                                        <span className="font-semibold text-orange-600">{log.adminEmail}</span>
+                                                        <span className="font-semibold text-orange-600">{log.adminName || log.adminEmail}</span>
+                                                        {log.adminName && <span className="text-gray-400">({log.adminEmail})</span>}
                                                         <span>•</span>
                                                         <span>{new Date(log.timestamp).toLocaleString()}</span>
                                                     </div>
