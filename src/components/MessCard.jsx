@@ -141,7 +141,7 @@ const MessCard = ({ mess }) => {
                         if (isExpired || !hasMenu) {
                             return (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
-                                    <div className={clsx("text-lg font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r", mess.color)}>Menu Not Uploaded</div>
+                                    <div className={clsx("text-lg font-bold mb-1", theme.text)}>Menu Not Uploaded</div>
                                     <p className="text-xs text-gray-400">Check back later</p>
                                 </div>
                             );
@@ -184,19 +184,19 @@ const MessCard = ({ mess }) => {
                                     `}</style>
                                     <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                                         <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Breakfast)}</p>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Breakfast)}</p>
                                     </div>
                                     <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                                         <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Lunch)}</p>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Lunch)}</p>
                                     </div>
                                     <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                                         <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Snacks)}</p>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Snacks)}</p>
                                     </div>
                                     <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                                         <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Dinner)}</p>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Dinner)}</p>
                                     </div>
                                 </div>
                             </>
