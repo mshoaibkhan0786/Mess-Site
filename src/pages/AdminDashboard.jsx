@@ -58,64 +58,9 @@ const AdminDashboard = () => {
         try {
             // 1. Convert file to Base64
             const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                const base64Data = reader.result.split(',')[1];
-
-                setUploadStatus('processing');
-
-                // 2. Call Gemini API
-                const { GoogleGenerativeAI } = await import("@google/generative-ai");
-                const genAI = new GoogleGenerativeAI("AIzaSyBiZukqBjGS2nd2lyyVTCle02aHth6jrLQ");
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-                const prompt = `
-                Extract the weekly menu from this image and return it as a strictly valid JSON object.
-                The JSON structure must be exactly like this:
-                {
-                    "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
-                    "Tuesday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
-                    ... and so on for all 7 days.
-                }
-                If a meal is missing, use "N/A".
-                Do not include any markdown formatting (like \`\`\`json), just the raw JSON string.
-                `;
-
-                const result = await model.generateContent([
-                    prompt,
-                    {
-                        inlineData: {
-                            data: base64Data,
-                            mimeType: file.type
-                        }
-                    }
-                ]);
-
-                const response = await result.response;
-                const text = response.text();
-
-                // Clean up the response if it contains markdown code blocks
-                const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const newMenu = JSON.parse(cleanJson);
-
-                // 3. Update Firestore
-                const messRef = doc(db, "messes", selectedMess);
-                await updateDoc(messRef, { menu: newMenu });
-                setUploadStatus('success');
-            };
-        } catch (error) {
-            console.error("Error processing menu:", error);
-            setUploadStatus('idle');
-            alert("Failed to process menu. Please try again.");
-        }
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50 relative">
-            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
                 <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-            </div>
+            </div >
 
             <Navbar />
 
@@ -237,7 +182,7 @@ const AdminDashboard = () => {
                     </div>
                 </motion.div>
             </main>
-        </div>
+        </div >
     );
 };
 
