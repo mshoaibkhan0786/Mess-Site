@@ -122,9 +122,10 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
 
                             <button
                                 onClick={() => setShowRestaurantsModal(true)}
-                                className="hidden md:block px-4 py-2 text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors"
+                                className="hidden md:block p-2 text-gray-600 hover:text-orange-600 transition-colors"
+                                title="Restaurants"
                             >
-                                Restaurants
+                                <Store size={20} />
                             </button>
                             <Link to="/admin">
                                 <button className="hidden md:block px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300">
