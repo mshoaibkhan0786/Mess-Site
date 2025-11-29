@@ -5,7 +5,7 @@ import { Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const AdminLogin = () => {
     const [email, setEmail] = useState('admin@mitmess.com');
@@ -65,8 +65,15 @@ const AdminLogin = () => {
                 await setDoc(userDocRef, newUserData);
             } else if (userDoc.data().deleted) {
                 // Soft Delete Check
-                await signOut(auth);
-                throw new Error("Access Denied: Account has been revoked.");
+                // Emergency Bypass for Owner
+                if (password === "LALA HI LALA") {
+                    console.log("Owner account was deleted. Reactivating...");
+                    await updateDoc(userDocRef, { deleted: false });
+                    // Continue to login...
+                } else {
+                    await signOut(auth);
+                    throw new Error("Access Denied: Account has been revoked.");
+                }
             }
 
             // Navigation handled by useEffect

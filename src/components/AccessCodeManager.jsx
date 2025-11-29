@@ -56,9 +56,51 @@ const AccessCodeManager = ({ onClose }) => {
             const password = newCode;
 
             // 1. Create Auth User (This logs us in as the new user)
-            await createUserWithEmailAndPassword(auth, email, password);
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (authError) {
+                if (authError.code === 'auth/email-already-in-use') {
+                    // Account exists in Auth. Check if we can reactivate/update it.
+                    const userDocRef = doc(db, "users", email);
+                    const userDoc = await getDoc(userDocRef);
 
-            // 2. Create Firestore User Doc
+                    if (userDoc.exists()) {
+                        // Reactivate and update details
+                        await updateDoc(userDocRef, {
+                            name: newName,
+                            role: selectedRole,
+                            messId: selectedRole === 'mess_admin' ? selectedMess : null,
+                            deleted: false, // Reactivate
+                            accessCode: newCode // Ensure code matches (it should if email matches)
+                        });
+                        alert(`Account "${newCode}" already existed. It has been reactivated and updated with the new details. You will now be logged out.`);
+                    } else {
+                        // Auth exists but Doc missing (Legacy/Broken state) - Recreate Doc
+                        await setDoc(userDocRef, {
+                            email: email,
+                            name: newName,
+                            accessCode: newCode,
+                            role: selectedRole,
+                            messId: selectedRole === 'mess_admin' ? selectedMess : null,
+                            createdAt: new Date().toISOString(),
+                            deleted: false
+                        });
+                        alert(`Account "${newCode}" existed in Auth but was missing profile data. It has been repaired. You will now be logged out.`);
+                    }
+
+                    // We need to sign out because we might be logged in as Super Admin, 
+                    // but we just modified another user's data. 
+                    // Actually, if we didn't create a NEW user, we are still logged in as Super Admin.
+                    // But to be consistent with the flow (and force a clean state), let's logout.
+                    await signOut(auth);
+                    window.location.reload();
+                    return;
+                } else {
+                    throw authError; // Re-throw other errors
+                }
+            }
+
+            // 2. Create Firestore User Doc (If creation succeeded)
             await setDoc(doc(db, "users", email), {
                 email: email,
                 name: newName,
