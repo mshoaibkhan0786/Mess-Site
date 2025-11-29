@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X, History, Clock, UserPlus } from 'lucide-react';
+import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X, History, Clock, UserPlus, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { db, auth } from '../firebase';
 import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, getDoc, query, orderBy, limit } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import AccessCodeManager from '../components/AccessCodeManager';
 
@@ -31,6 +31,15 @@ const AdminDashboard = () => {
     const [showAccessManager, setShowAccessManager] = useState(false);
 
     const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            navigate('/admin');
+        } catch (error) {
+            console.error("Error logging out:", error);
+        }
+    };
 
     const logAction = async (action, details, messId = null) => {
         try {
@@ -304,27 +313,36 @@ const AdminDashboard = () => {
                             <h1 className="text-3xl font-bold text-gray-900">Menu Dashboard</h1>
                             <p className="text-gray-500 mt-2">Update weekly menus using AI-powered image recognition</p>
                         </div>
-                        {userRole === 'super_admin' && (
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setShowAccessManager(true)}
-                                    className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
-                                    title="Manage Access Codes"
-                                >
-                                    <UserPlus size={24} />
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setShowHistoryModal(true);
-                                        fetchHistory();
-                                    }}
-                                    className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
-                                    title="View History"
-                                >
-                                    <History size={24} />
-                                </button>
-                            </div>
-                        )}
+                        <div className="flex gap-2">
+                            {userRole === 'super_admin' && (
+                                <>
+                                    <button
+                                        onClick={() => setShowAccessManager(true)}
+                                        className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
+                                        title="Manage Access Codes"
+                                    >
+                                        <UserPlus size={24} />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowHistoryModal(true);
+                                            fetchHistory();
+                                        }}
+                                        className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
+                                        title="View History"
+                                    >
+                                        <History size={24} />
+                                    </button>
+                                </>
+                            )}
+                            <button
+                                onClick={handleLogout}
+                                className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+                                title="Logout"
+                            >
+                                <LogOut size={24} />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="p-8">
