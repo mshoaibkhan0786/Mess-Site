@@ -35,7 +35,9 @@ const AccessCodeManager = ({ onClose }) => {
         setError('');
 
         try {
-            const email = `${newCode}@mitmess.com`;
+            // Sanitize code for email: trim and replace spaces with underscores
+            const sanitizedCode = newCode.trim().replace(/\s+/g, '_');
+            const email = `${sanitizedCode}@mitmess.com`;
             const password = newCode;
 
             // 1. Create Auth User (This logs us in as the new user)

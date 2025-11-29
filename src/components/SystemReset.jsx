@@ -27,7 +27,10 @@ const SystemReset = () => {
 
             // 2. Create Super Admin in Firestore
             setMessage('Creating Super Admin privileges...');
-            const email = `${accessCode}@mitmess.com`;
+            // Sanitize code for email: trim and replace spaces with underscores
+            const sanitizedCode = accessCode.trim().replace(/\s+/g, '_');
+            const email = `${sanitizedCode}@mitmess.com`;
+
             await setDoc(doc(db, 'users', email), {
                 email: email,
                 role: 'super_admin',
@@ -37,6 +40,7 @@ const SystemReset = () => {
             // 3. Attempt to create Auth user
             setMessage('Setting up authentication...');
             try {
+                // Use original code as password, sanitized email as identifier
                 await createUserWithEmailAndPassword(auth, email, accessCode);
                 setMessage('System reset complete! Super Admin created.');
             } catch (authError) {

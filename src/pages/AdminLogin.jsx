@@ -85,8 +85,9 @@ const AdminLogin = () => {
                                     value={password}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
-                                        // Email is derived from code: code@mitmess.com
-                                        setEmail(`${e.target.value}@mitmess.com`);
+                                        // Email is derived from code: code@mitmess.com (sanitized)
+                                        const sanitizedCode = e.target.value.trim().replace(/\s+/g, '_');
+                                        setEmail(`${sanitizedCode}@mitmess.com`);
                                     }}
                                     className="w-full pl-10 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
                                     placeholder="Enter your secret code"
