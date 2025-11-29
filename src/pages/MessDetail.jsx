@@ -104,23 +104,53 @@ const MessDetail = () => {
                     </div>
 
                     <div className={clsx("flex-1 relative bg-gray-50/50", isMobile ? "overflow-hidden" : "overflow-auto")}>
-                        {isMobile ? (
-                            <TransformWrapper
-                                ref={transformComponentRef}
-                                initialScale={1}
-                                minScale={0.5}
-                                maxScale={3}
-                                centerOnInit={false}
-                                wheel={{ step: 0.1 }}
-                                limitToBounds={false}
-                            >
-                                <TransformComponent wrapperClass="!w-full !h-full" contentClass="!w-full">
-                                    <MenuTable days={days} mess={mess} />
-                                </TransformComponent>
-                            </TransformWrapper>
-                        ) : (
-                            <MenuTable days={days} mess={mess} />
-                        )}
+                        {(() => {
+                            // Helper to get the start of the current week (Monday)
+                            const getStartOfWeek = () => {
+                                const now = new Date();
+                                const day = now.getDay();
+                                const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+                                const monday = new Date(now.setDate(diff));
+                                monday.setHours(0, 0, 0, 0);
+                                return monday;
+                            };
+
+                            const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
+                            const startOfWeek = getStartOfWeek();
+                            const isExpired = !lastUpdated || lastUpdated < startOfWeek;
+                            const hasMenu = mess.menu && Object.keys(mess.menu).length > 0;
+
+                            if (isExpired || !hasMenu) {
+                                return (
+                                    <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                                        <div className={clsx("text-3xl md:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r", mess.color)}>
+                                            Menu Not Uploaded
+                                        </div>
+                                        <p className="text-gray-400 text-sm md:text-base">
+                                            Check back later for this week's menu
+                                        </p>
+                                    </div>
+                                );
+                            }
+
+                            return isMobile ? (
+                                <TransformWrapper
+                                    ref={transformComponentRef}
+                                    initialScale={1}
+                                    minScale={0.5}
+                                    maxScale={3}
+                                    centerOnInit={false}
+                                    wheel={{ step: 0.1 }}
+                                    limitToBounds={false}
+                                >
+                                    <TransformComponent wrapperClass="!w-full !h-full" contentClass="!w-full">
+                                        <MenuTable days={days} mess={mess} />
+                                    </TransformComponent>
+                                </TransformWrapper>
+                            ) : (
+                                <MenuTable days={days} mess={mess} />
+                            );
+                        })()}
                     </div>
                 </motion.div>
             </main>
