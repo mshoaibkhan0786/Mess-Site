@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X, History, Clock, UserPlus, LogOut } from 'lucide-react';
+import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X, History, Clock, UserPlus, LogOut, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { db, auth } from '../firebase';
@@ -318,6 +318,66 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleAutoSync = async () => {
+        if (!selectedMess) return;
+        setUploadStatus('processing'); // Reuse upload status for UI feedback
+        setErrorMessage('');
+
+        try {
+            // 1. Fetch from FC2 API
+            // The API defaults to the current week if no parameters are provided.
+            const response = await fetch('https://tikm.coolstuff.work/api/menu');
+            if (!response.ok) throw new Error("Failed to fetch from FC2 API");
+
+            const data = await response.json();
+            if (!data.menu) throw new Error("Invalid data received from FC2 API");
+
+            // 2. Map API Data to Our Schema
+            const newMenu = {
+                Monday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Tuesday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Wednesday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Thursday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Friday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Saturday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" },
+                Sunday: { Breakfast: "N/A", Lunch: "N/A", Snacks: "N/A", Dinner: "N/A" }
+            };
+
+            // Iterate over dates in the response
+            Object.values(data.menu).forEach(dayData => {
+                const dayName = dayData.day; // e.g., "Monday"
+                if (newMenu[dayName]) {
+                    // Helper to join items
+                    const joinItems = (items) => Array.isArray(items) ? items.join(", ") : (items || "N/A");
+
+                    newMenu[dayName] = {
+                        Breakfast: joinItems(dayData.meals?.breakfast?.items),
+                        Lunch: joinItems(dayData.meals?.lunch?.items),
+                        Snacks: joinItems(dayData.meals?.snacks?.items),
+                        Dinner: joinItems(dayData.meals?.dinner?.items)
+                    };
+                }
+            });
+
+            // 3. Update Firestore
+            const messRef = doc(db, "messes", selectedMess);
+            await updateDoc(messRef, {
+                menu: newMenu,
+                lastUpdated: new Date().toISOString()
+            });
+
+            const messName = messes.find(m => m.id === selectedMess)?.name || selectedMess;
+            await logAction("AUTO_SYNC_MENU", `Auto-synced menu from FC2 for ${messName}`, selectedMess);
+
+            setUploadStatus('success');
+
+        } catch (error) {
+            console.error("Auto Sync Error:", error);
+            setUploadStatus('error');
+            setErrorMessage(error.message || "Failed to sync with FC2.");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 relative">
             <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -433,12 +493,25 @@ const AdminDashboard = () => {
                                         }}
                                         accept="image/*"
                                     />
-                                    <label
-                                        htmlFor="file-upload"
-                                        className="px-6 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
-                                    >
-                                        Browse Files
-                                    </label>
+                                    <div className="flex flex-col items-center gap-4">
+                                        <label
+                                            htmlFor="file-upload"
+                                            className="px-6 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+                                        >
+                                            Browse Files
+                                        </label>
+                                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                                            <span className="h-px w-12 bg-gray-200"></span>
+                                            <span>OR</span>
+                                            <span className="h-px w-12 bg-gray-200"></span>
+                                        </div>
+                                        <button
+                                            onClick={handleAutoSync}
+                                            className="px-6 py-2 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg font-medium hover:bg-blue-100 transition-colors shadow-sm flex items-center gap-2"
+                                        >
+                                            <RefreshCw size={18} /> Sync with FC2
+                                        </button>
+                                    </div>
                                 </motion.div>
                             )}
 
