@@ -75,24 +75,24 @@ const AdminLogin = () => {
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Admin ID</label>
-                            <input
-                                type="text"
-                                value={email.replace('@mitmess.com', '')}
-                                onChange={(e) => setEmail(`${e.target.value}@mitmess.com`)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
-                                placeholder="e.g. admin, aditya, annapoorna"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Password</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
-                                placeholder="Enter password"
-                            />
+                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Access Code</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        // Email is derived from code: code@mitmess.com
+                                        setEmail(`${e.target.value}@mitmess.com`);
+                                    }}
+                                    className="w-full pl-10 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
+                                    placeholder="Enter your secret code"
+                                    autoFocus
+                                />
+                            </div>
                             {error && <p className="text-red-500 text-sm mt-2 ml-1">{error}</p>}
                         </div>
 
@@ -101,7 +101,7 @@ const AdminLogin = () => {
                             disabled={loading}
                             className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <>Login <ArrowRight size={20} /></>}
+                            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <>Access Dashboard <ArrowRight size={20} /></>}
                         </button>
                     </form>
                 </motion.div>

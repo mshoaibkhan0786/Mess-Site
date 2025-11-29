@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X, History, Clock } from 'lucide-react';
+import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X, History, Clock, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { db, auth } from '../firebase';
 import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, getDoc, query, orderBy, limit } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import AccessCodeManager from '../components/AccessCodeManager';
 
 const AdminDashboard = () => {
     const [messes, setMesses] = useState([]);
@@ -25,6 +26,9 @@ const AdminDashboard = () => {
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [auditLogs, setAuditLogs] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+
+    // Access Code Manager State
+    const [showAccessManager, setShowAccessManager] = useState(false);
 
     const navigate = useNavigate();
 
@@ -301,16 +305,25 @@ const AdminDashboard = () => {
                             <p className="text-gray-500 mt-2">Update weekly menus using AI-powered image recognition</p>
                         </div>
                         {userRole === 'super_admin' && (
-                            <button
-                                onClick={() => {
-                                    setShowHistoryModal(true);
-                                    fetchHistory();
-                                }}
-                                className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
-                                title="View History"
-                            >
-                                <History size={24} />
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setShowAccessManager(true)}
+                                    className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
+                                    title="Manage Access Codes"
+                                >
+                                    <UserPlus size={24} />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowHistoryModal(true);
+                                        fetchHistory();
+                                    }}
+                                    className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
+                                    title="View History"
+                                >
+                                    <History size={24} />
+                                </button>
+                            </div>
                         )}
                     </div>
 
@@ -576,6 +589,13 @@ const AdminDashboard = () => {
                             </div>
                         </motion.div>
                     </div>
+                )}
+            </AnimatePresence>
+
+            {/* Access Code Manager Modal */}
+            <AnimatePresence>
+                {showAccessManager && (
+                    <AccessCodeManager onClose={() => setShowAccessManager(false)} />
                 )}
             </AnimatePresence>
         </div>
