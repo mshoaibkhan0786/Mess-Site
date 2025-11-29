@@ -118,7 +118,11 @@ const MessDetail = () => {
                             const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
                             const startOfWeek = getStartOfWeek();
                             const isExpired = !lastUpdated || lastUpdated < startOfWeek;
-                            const hasMenu = mess.menu && Object.keys(mess.menu).length > 0;
+                            const hasMenu = mess.menu && Object.keys(mess.menu).some(day => {
+                                const dayMenu = mess.menu[day];
+                                if (!dayMenu) return false;
+                                return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
+                            });
 
                             if (isExpired || !hasMenu) {
                                 return (
