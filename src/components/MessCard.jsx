@@ -113,22 +113,22 @@ const MessCard = ({ mess }) => {
                     </div>
 
                     {/* Daily Menu Preview */}
-                    <div className="flex flex-col gap-2.5 flex-1">
-                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                    <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Breakfast}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Breakfast?.toLowerCase()}</p>
                         </div>
-                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Lunch}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Lunch?.toLowerCase()}</p>
                         </div>
-                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Snacks}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Snacks?.toLowerCase()}</p>
                         </div>
-                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                             <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
-                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Dinner}</p>
+                            <p className="text-gray-800 font-medium text-xs leading-tight capitalize">{currentDayMenu.Dinner?.toLowerCase()}</p>
                         </div>
                     </div>
 

@@ -81,6 +81,7 @@ const AdminDashboard = () => {
                     - Do NOT truncate. 
                     - List all items separated by commas exactly as they appear in the image.
                     - If there are multiple items (e.g., "Rice, Dal, Curd"), include ALL of them.
+                    - **IMPORTANT: Format all text in Sentence case (e.g., "Paneer butter masala", "Mix veg paratha"). Do NOT use ALL CAPS.**
 
                     The JSON structure must be exactly like this:
                     {
