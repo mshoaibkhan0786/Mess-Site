@@ -143,29 +143,34 @@ const MessDetail = () => {
                                 </button>
                             </div>
                             <div className="p-6 space-y-4">
-                                {(() => {
-                                    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-                                    const todayMenu = mess.menu[today] || mess.menu['Monday'];
-                                    return (
-                                        <>
-                                            <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
-                                                <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Breakfast}</p>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-green-50 border border-green-100">
-                                                <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Lunch}</p>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
-                                                <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Snacks}</p>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
-                                                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
-                                                <p className="text-gray-800 text-sm">{todayMenu.Dinner}</p>
-                                            </div>
-                                        </>
-                                    );
+                                const today = new Date().toLocaleDateString('en-US', {weekday: 'long' });
+                                const todayMenu = mess.menu[today] || mess.menu['Monday'];
+                                    
+                                    const toTitleCase = (str) => {
+                                        if (!str) return '';
+                                        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                    };
+
+                                return (
+                                <>
+                                    <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
+                                        <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
+                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Breakfast)}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-green-50 border border-green-100">
+                                        <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
+                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Lunch)}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
+                                        <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
+                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Snacks)}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+                                        <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
+                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Dinner)}</p>
+                                    </div>
+                                </>
+                                );
                                 })()}
                             </div>
                         </motion.div>
@@ -174,6 +179,11 @@ const MessDetail = () => {
             </AnimatePresence>
         </div>
     );
+};
+
+const toTitleCase = (str) => {
+    if (!str) return '';
+    return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
 const MenuTable = ({ days, mess }) => (
@@ -191,10 +201,10 @@ const MenuTable = ({ days, mess }) => (
             {days.map(day => (
                 <tr key={day} id={`row-${day}`} className="hover:bg-gray-50 transition-colors group duration-300">
                     <td className="py-1.5 px-3 font-bold text-gray-800 text-[10px]">{day}</td>
-                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{mess.menu[day]?.Breakfast}</td>
-                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{mess.menu[day]?.Lunch}</td>
-                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{mess.menu[day]?.Snacks}</td>
-                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{mess.menu[day]?.Dinner}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Breakfast)}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Lunch)}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Snacks)}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Dinner)}</td>
                 </tr>
             ))}
         </tbody>
