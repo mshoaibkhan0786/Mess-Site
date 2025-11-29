@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - MIT Manipal CSE Section CC</title>
+    <meta name="description" content="Dashboard for MIT Manipal CSE Section CC - Timetable, Faculty, Study Materials and more">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%236d28d9'/%3E%3Cpath fill='white' d='M50 20 l25 15 v30 l-25 15 l-25 -15 v-30 z M50 38 l15 9 v18 l-15 9 l-15 -9 v-18 z'/%3E%3C/svg%3E">
+    
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased">
+    <div id="app">
+        <!-- Header & Navigation -->
+        <header class="bg-[var(--nav-bg)] shadow-md fixed w-full top-0 z-50 transition-colors duration-300">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 transition-transform duration-300 ease-in-out hover:-translate-y-0.5 cursor-pointer" onclick="window.location.href='/';">
+                             <svg class="h-8 w-8" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                 <rect width="100" height="100" rx="20" fill="var(--accent-color)"/>
+                                 <path fill="white" d="M50 20 l25 15 v30 l-25 15 l-25 -15 v-30 z M50 38 l15 9 v18 l-15 9 l-15 -9 v-18 z"/>
+                               </svg>
+                        </div>
+                        <div class="ml-4">
+                            <!-- Desktop Nav -->
+                            <div class="hidden md:flex items-baseline space-x-4">
+                                <a href="/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Home</a>
+                                <a href="/timetable/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Timetable</a>
+                                <a href="/faculty/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Faculty</a>
+                                <a href="/calendar/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Calendar</a>
+                                <a href="/studymaterial/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Study Material</a>
+                                <a href="/restaurants/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Restaurants</a>
+                                <a href="/gallery/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Gallery</a>
+                                <a href="/circute/" class="nav-link px-3 py-2 rounded-md text-sm transition-colors focus-outline">Circute AI</a>
+                            </div>
+                            <!-- Mobile Visible Nav -->
+                            <div class="flex md:hidden items-baseline space-x-1">
+                                <a href="/" class="nav-link px-2 py-2 rounded-md text-sm transition-colors focus-outline">Home</a>
+                                <a href="/timetable/" class="nav-link px-2 py-2 rounded-md text-sm transition-colors focus-outline">Timetable</a>
+                                <a href="/faculty/" class="nav-link px-2 py-2 rounded-md text-sm transition-colors focus-outline">Faculty</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                         <!-- Theme Switcher -->
+                         <button class="theme-switcher-btn bg-[var(--bg-color)] p-2 rounded-full text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--nav-bg)] focus:ring-[var(--accent-color)] hidden md:block focus-outline">
+                             <svg class="theme-icon-sun h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                             <svg class="theme-icon-moon h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                        </button>
+                        
+                        <!-- ADDED: Login Button (will be hidden by JS if logged in) -->
+                        <a id="login-btn-header" href="/login/" class="bg-[var(--accent-color)] hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 duration-300 text-sm md:block">
+                            Login
+                        </a>
+
+                        <!-- Profile Dropdown (correctly hidden by default) -->
+                        <div class="relative hidden md:block" id="profile-dropdown-container">
+                             <button id="profile-btn" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--nav-bg)] focus:ring-[var(--accent-color)] focus-outline">
+                                <span class="sr-only">Open user menu</span>
+                                <div class="h-8 w-8 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white font-bold" id="profile-initial">
+                                    ?
+                                </div>
+                            </button>
+                            <div id="profile-dropdown" class="profile-dropdown-menu hidden">
+                                <div class="px-4 py-3">
+                                    <!-- Name Display and Edit Button -->
+                                    <div class="flex items-center justify-between" id="name-display-container">
+                                        <p class="text-sm font-semibold text-[var(--header-text)]" id="profile-name">Loading...</p>
+                                        <button id="edit-name-btn" class="p-1 rounded-full hover:bg-[var(--bg-color)] focus-outline">
+                                            <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z" /></svg>
+                                        </button>
+                                    </div>
+                                    <!-- Edit Name Form (hidden by default) -->
+                                    <div id="edit-name-form" class="hidden">
+                                        <label for="edit-name-input" class="text-xs text-gray-500">Edit Name</label>
+                                        <input type="text" id="edit-name-input" class="mt-1 w-full text-sm border border-[var(--border-color)] rounded-md px-2 py-1 bg-[var(--bg-color)] focus-outline">
+                                        <div class="flex items-center justify-end space-x-2 mt-2">
+                                            <button id="cancel-edit-name-btn" class="text-xs px-2 py-1 rounded-md hover:bg-[var(--border-color)] focus-outline">Cancel</button>
+                                            <button id="save-name-btn" class="text-xs px-2 py-1 rounded-md bg-[var(--accent-color)] text-white hover:opacity-90 focus-outline">Save</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-500 truncate" id="profile-email">...</p>
+                                    <p class="text-sm text-gray-500 truncate" id="profile-phone">...</p>
+                                </div>
+                                <div class="py-1 border-t border-[var(--border-color)]">
+                                    <button id="logout-btn-desktop" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-[var(--bg-color)] focus-outline">Sign out</button>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div class="ml-2 flex md:hidden">
+                            <button id="mobile-menu-button" type="button" class="bg-[var(--card-bg)] inline-flex items-center justify-center p-2 rounded-md text-[var(--text-color)] hover:bg-[var(--bg-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg)] focus:ring-[var(--accent-color)] focus-outline">
+                                <span class="sr-only">Open main menu</span>
+                                <svg id="menu-open-icon" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <svg id="menu-close-icon" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            <!-- Mobile menu -->
+            <div id="mobile-menu" class="md:hidden hidden">
+                 <!-- Mobile Profile Section -->
+                <div class="px-5 pt-4 pb-3 border-b border-[var(--border-color)]">
+                     <!-- ADDED: Mobile Login Button (will be hidden by JS) -->
+                    <a id="login-btn-mobile" href="/login/" class="bg-[var(--accent-color)] hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 duration-300 text-sm w-full text-center block">
+                        Login / Sign Up
+                    </a>
+                    
+                    <!-- ADDED: ID to this div to hide/show it -->
+                    <div class="flex items-center hidden" id="mobile-profile-info-block">
+                         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white font-bold" id="mobile-profile-initial">?</div>
+                        <div class="ml-3 flex-grow min-w-0">
+                            <!-- Mobile Name Display -->
+                            <div id="mobile-name-display" class="flex items-center justify-between">
+                                <p class="text-base font-semibold text-[var(--header-text)] truncate" id="mobile-profile-name">Loading...</p>
+                                <button id="mobile-edit-name-btn" class="p-1 rounded-full hover:bg-[var(--bg-color)] -mr-2 flex-shrink-0 focus-outline">
+                                     <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z" /></svg>
+                                </button>
+                            </div>
+                             <!-- Mobile Edit Name Form -->
+                            <div id="mobile-edit-name-form" class="hidden">
+                                 <label for="mobile-edit-name-input" class="text-xs text-gray-500">Edit Name</label>
+                                 <input type="text" id="mobile-edit-name-input" class="mt-1 w-full text-sm border border-[var(--border-color)] rounded-md px-2 py-1 bg-[var(--bg-color)] focus-outline">
+                                 <div class="flex items-center justify-end space-x-2 mt-2">
+                                     <button id="mobile-cancel-edit-name-btn" class="text-xs px-2 py-1 rounded-md hover:bg-[var(--border-color)] focus-outline">Cancel</button>
+                                     <button id="mobile-save-name-btn" class="text-xs px-2 py-1 rounded-md bg-[var(--accent-color)] text-white hover:opacity-90 focus-outline">Save</button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate" id="mobile-profile-email">...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="/calendar/" class="nav-link block px-3 py-2 rounded-md text-base focus-outline">Calendar</a>
+                    <a href="/studymaterial/" class="nav-link block px-3 py-2 rounded-md text-base focus-outline">Study Material</a> 
+                    <a href="/restaurants/" class="nav-link block px-3 py-2 rounded-md text-base focus-outline">Restaurants</a>
+                    <a href="/gallery/" class="nav-link block px-3 py-2 rounded-md text-base focus-outline">Gallery</a>
+                    <a href="/circute/" class="nav-link block px-3 py-2 rounded-md text-base focus-outline">Circute AI</a>
+                </div>
+                <div class="border-t border-[var(--border-color)] px-2 py-3 space-y-2">
+                    <div class="flex items-center justify-between px-3">
+                        <span class="font-medium text-base text-[var(--text-color)]">Toggle Theme</span>
+                        <button class="theme-switcher-btn bg-[var(--bg-color)] p-2 rounded-full text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--nav-bg)] focus:ring-[var(--accent-color)] focus-outline">
+                            <svg class="theme-icon-sun h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                            <svg class="theme-icon-moon h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                        </button>
+                    </div>
+                    <!-- Mobile Logout Button -->
+                    <button id="logout-btn-mobile" class="w-full text-left block px-3 py-2 text-base text-red-600 rounded-md hover:bg-[var(--bg-color)] focus-outline">Sign out</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content-area max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Home Page -->
+            <section id="home">
+                <header class="mb-8">
+                    <h1 class="text-3xl font-bold text-[var(--header-text)]">Dashboard</h1>
+                    <p class="text-md mt-1">Deadlines and tasks for Section CC</p>
+                </header>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Main Content -->
+                    <div class="lg:col-span-2">
+                        <div class="space-y-8">
+                            <section id="quizzes">
+                                <h2 class="text-2xl font-semibold mb-4 text-[var(--header-text)] flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-[var(--accent-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Upcoming Quizzes
+                                </h2>
+                                <div class="space-y-4"></div>
+                            </section>
+                            <section id="assignments">
+                                <h2 class="text-2xl font-semibold mb-4 text-[var(--header-text)] flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-[var(--accent-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                                    Upcoming Assignments
+                                </h2>
+                                <div class="space-y-4"></div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="lg:col-span-1">
+                        <section id="notifications">
+                            <h2 class="text-2xl font-semibold mb-4 text-[var(--header-text)] flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-[var(--accent-color)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                Announcements
+                            </h2>
+                            <div class="space-y-3">
+                                <!-- Notification cards will be injected here by JavaScript -->
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center py-6 border-t border-[var(--border-color)] mt-12">
+            <p class="text-sm text-gray-400 dark:text-gray-500 opacity-75">Built by Mohammad Shoaib Khan</p>
+        </footer>
+    </div>
+    
+    <!-- REMOVED conflicting SW registration script -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -531,25 +531,9 @@ const AdminDashboard = () => {
                                     exit={{ opacity: 0 }}
                                     className="border rounded-2xl p-12 text-center bg-white/50"
                                 >
-                                    <div className="relative w-24 h-24 mx-auto mb-6">
-                                        <div className="absolute inset-0 border-4 border-orange-100 rounded-full"></div>
-                                        <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            {uploadStatus === 'uploading' ? (
-                                                <Upload className="text-orange-500 animate-pulse" size={32} />
-                                            ) : (
-                                                <FileText className="text-orange-500 animate-pulse" size={32} />
-                                            )}
-                                        </div>
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                        {uploadStatus === 'uploading' ? 'Uploading Image...' : 'AI Processing...'}
-                                    </h3>
-                                    <p className="text-gray-500">
-                                        {uploadStatus === 'uploading'
-                                            ? 'Sending to server'
-                                            : 'Extracting menu items from image'}
-                                    </p>
+                                    <div className="w-24 h-24 mx-auto mb-6 rounded-full skeleton-loader"></div>
+                                    <div className="h-8 w-48 mx-auto mb-4 rounded skeleton-loader"></div>
+                                    <div className="h-4 w-64 mx-auto rounded skeleton-loader"></div>
                                 </motion.div>
                             )}
 
@@ -686,8 +670,18 @@ const AdminDashboard = () => {
                             </div>
                             <div className="p-6 overflow-y-auto flex-1">
                                 {loadingHistory ? (
-                                    <div className="flex justify-center py-8">
-                                        <Loader2 className="animate-spin text-orange-500" size={32} />
+                                    <div className="space-y-4">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="flex gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                                <div className="mt-1">
+                                                    <div className="w-8 h-8 rounded-full skeleton-loader"></div>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="h-4 w-3/4 mb-2 rounded skeleton-loader"></div>
+                                                    <div className="h-3 w-1/2 rounded skeleton-loader"></div>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : auditLogs.length === 0 ? (
                                     <p className="text-center text-gray-500 py-8">No activity recorded yet.</p>
