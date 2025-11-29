@@ -27,8 +27,8 @@ const SystemReset = () => {
 
             // 2. Create Super Admin in Firestore
             setMessage('Creating Super Admin privileges...');
-            // Sanitize code for email: trim and replace spaces with underscores
-            const sanitizedCode = accessCode.trim().replace(/\s+/g, '_');
+            // Sanitize code for email: trim, replace spaces with underscores, and lowercase
+            const sanitizedCode = accessCode.trim().replace(/\s+/g, '_').toLowerCase();
             const email = `${sanitizedCode}@mitmess.com`;
 
             await setDoc(doc(db, 'users', email), {

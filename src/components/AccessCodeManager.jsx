@@ -35,8 +35,8 @@ const AccessCodeManager = ({ onClose }) => {
         setError('');
 
         try {
-            // Sanitize code for email: trim and replace spaces with underscores
-            const sanitizedCode = newCode.trim().replace(/\s+/g, '_');
+            // Sanitize code for email: trim, replace spaces with underscores, and lowercase
+            const sanitizedCode = newCode.trim().replace(/\s+/g, '_').toLowerCase();
             const email = `${sanitizedCode}@mitmess.com`;
             const password = newCode;
 
