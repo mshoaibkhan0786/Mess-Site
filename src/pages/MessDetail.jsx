@@ -137,19 +137,6 @@ const MessDetail = () => {
                             className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
                         >
                             <div className={clsx("p-4 bg-gradient-to-r text-white flex justify-between items-center", mess.color)}>
-                                <h3 className="text-lg font-bold">Today's Menu ({new Date().toLocaleDateString('en-US', { weekday: 'long' })})</h3>
-                                <button onClick={() => setShowTodayModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="p-6 space-y-4">
-                                const today = new Date().toLocaleDateString('en-US', {weekday: 'long' });
-                                const todayMenu = mess.menu[today] || mess.menu['Monday'];
-                                    
-                                    const toTitleCase = (str) => {
-                                        if (!str) return '';
-                                        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                    };
 
                                 return (
                                 <>
