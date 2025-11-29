@@ -71,12 +71,12 @@ const MessCard = ({ mess }) => {
     };
 
     return (
-        <Link to={`/mess/${mess.id}`} className="h-auto md:h-[32rem] block">
+        <Link to={`/mess/${mess.id}`} className="h-full block">
             <motion.div
                 layout
                 whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 className={clsx(
-                    "relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-100 cursor-pointer group h-full flex flex-col min-h-[32rem] md:min-h-0",
+                    "relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-100 cursor-pointer group h-full flex flex-col",
                     theme.shadow
                 )}
             >
@@ -140,7 +140,7 @@ const MessCard = ({ mess }) => {
 
                         if (isExpired || !hasMenu) {
                             return (
-                                <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
+                                <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70 min-h-[200px]">
                                     <div className={clsx("text-lg font-bold mb-1", theme.text)}>Menu Not Uploaded</div>
                                     <p className="text-xs text-gray-400">Check back later</p>
                                 </div>
@@ -172,7 +172,7 @@ const MessCard = ({ mess }) => {
                                 </div>
 
                                 {/* Daily Menu Preview */}
-                                <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 pb-4 custom-scrollbar scrollbar-hide">
+                                <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 pb-6 custom-scrollbar scrollbar-hide">
                                     <style jsx>{`
                                         .scrollbar-hide::-webkit-scrollbar {
                                             display: none;
