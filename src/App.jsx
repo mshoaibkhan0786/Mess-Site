@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import MessDetail from './pages/MessDetail';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import SeedRoles from './components/SeedRoles';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/mess/:id" element={<MessDetail />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/seed-roles" element={<SeedRoles />} />
         </Routes>
       </Router>
     </ErrorBoundary>

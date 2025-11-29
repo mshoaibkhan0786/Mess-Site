@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X } from 'lucide-react';
+import { Upload, CheckCircle, Loader2, FileText, Plus, Trash2, X, History, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { db, auth } from '../firebase';
-import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, getDoc, query, orderBy, limit } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,32 +13,96 @@ const AdminDashboard = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, processing, success, error
     const [errorMessage, setErrorMessage] = useState('');
+    const [userRole, setUserRole] = useState(null); // 'super_admin' | 'mess_admin'
+    const [assignedMessId, setAssignedMessId] = useState(null);
 
     // New State for Add Mess
     const [showAddModal, setShowAddModal] = useState(false);
     const [newMessName, setNewMessName] = useState('');
     const [newMessColor, setNewMessColor] = useState('from-orange-500 to-red-500'); // Default color
 
+    // History State
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [auditLogs, setAuditLogs] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+
     const navigate = useNavigate();
+
+    const logAction = async (action, details, messId = null) => {
+        try {
+            await addDoc(collection(db, "audit_logs"), {
+                timestamp: new Date().toISOString(),
+                action,
+                details,
+                messId,
+                adminEmail: auth.currentUser?.email || 'unknown'
+            });
+        } catch (error) {
+            console.error("Failed to log action:", error);
+        }
+    };
 
     const fetchMesses = async () => {
         const querySnapshot = await getDocs(collection(db, "messes"));
         const messesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setMesses(messesData);
-        if (messesData.length > 0 && !selectedMess) {
+
+        // If mess admin, auto-select their mess
+        if (assignedMessId) {
+            setSelectedMess(assignedMessId);
+        } else if (messesData.length > 0 && !selectedMess) {
             setSelectedMess(messesData[0].id);
         }
     };
 
+    const fetchUserRole = async (user) => {
+        if (!user) return;
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.email));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                setUserRole(userData.role);
+                setAssignedMessId(userData.messId);
+                if (userData.role === 'mess_admin' && userData.messId) {
+                    setSelectedMess(userData.messId);
+                }
+            } else {
+                // Default to mess_admin if not found (safety fallback, or handle as unauthorized)
+                // For now, let's assume if not in DB, they might be legacy admin (super) or restricted.
+                // Better to be restrictive:
+                console.warn("User not found in users collection, defaulting to restricted access.");
+                setUserRole('mess_admin');
+            }
+        } catch (error) {
+            console.error("Error fetching user role:", error);
+        }
+    };
+
+    const fetchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+            const q = query(collection(db, "audit_logs"), orderBy("timestamp", "desc"), limit(50));
+            const querySnapshot = await getDocs(q);
+            const logs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setAuditLogs(logs);
+        } catch (error) {
+            console.error("Error fetching history:", error);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 navigate('/admin');
+            } else {
+                await fetchUserRole(user);
+                fetchMesses();
             }
         });
-        fetchMesses();
         return () => unsubscribe();
-    }, [navigate]);
+    }, [navigate, assignedMessId]); // Re-fetch messes if assignedMessId changes
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -80,6 +144,8 @@ const AdminDashboard = () => {
                 lastUpdated: new Date().toISOString()
             });
 
+            await logAction("CREATE_MESS", `Created mess: ${newMessName}`, docRef.id);
+
             setNewMessName('');
             setShowAddModal(false);
             await fetchMesses();
@@ -95,7 +161,10 @@ const AdminDashboard = () => {
         if (!selectedMess) return;
         if (window.confirm("Are you sure you want to delete this mess? This action cannot be undone.")) {
             try {
+                const messName = messes.find(m => m.id === selectedMess)?.name || selectedMess;
                 await deleteDoc(doc(db, "messes", selectedMess));
+                await logAction("DELETE_MESS", `Deleted mess: ${messName}`, selectedMess);
+
                 await fetchMesses();
                 if (messes.length > 1) {
                     setSelectedMess(messes[0].id === selectedMess ? messes[1].id : messes[0].id);
@@ -193,6 +262,10 @@ const AdminDashboard = () => {
                         menu: newMenu,
                         lastUpdated: new Date().toISOString()
                     });
+
+                    const messName = messes.find(m => m.id === selectedMess)?.name || selectedMess;
+                    await logAction("UPDATE_MENU", `Updated menu for ${messName}`, selectedMess);
+
                     setUploadStatus('success');
                 } catch (innerError) {
                     console.error("Gemini/Firestore Error:", innerError);
@@ -222,9 +295,23 @@ const AdminDashboard = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 overflow-hidden"
                 >
-                    <div className="p-8 border-b border-gray-100">
-                        <h1 className="text-3xl font-bold text-gray-900">Menu Dashboard</h1>
-                        <p className="text-gray-500 mt-2">Update weekly menus using AI-powered image recognition</p>
+                    <div className="p-8 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900">Menu Dashboard</h1>
+                            <p className="text-gray-500 mt-2">Update weekly menus using AI-powered image recognition</p>
+                        </div>
+                        {userRole === 'super_admin' && (
+                            <button
+                                onClick={() => {
+                                    setShowHistoryModal(true);
+                                    fetchHistory();
+                                }}
+                                className="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-all"
+                                title="View History"
+                            >
+                                <History size={24} />
+                            </button>
+                        )}
                     </div>
 
                     <div className="p-8">
@@ -234,27 +321,32 @@ const AdminDashboard = () => {
                                 <select
                                     value={selectedMess}
                                     onChange={(e) => setSelectedMess(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none bg-white/50"
+                                    disabled={userRole === 'mess_admin'}
+                                    className={`w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none bg-white/50 ${userRole === 'mess_admin' ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
                                     {messes.map(mess => (
                                         <option key={mess.id} value={mess.id}>{mess.name}</option>
                                     ))}
                                 </select>
                             </div>
-                            <button
-                                onClick={() => setShowAddModal(true)}
-                                className="p-3 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
-                                title="Add New Mess"
-                            >
-                                <Plus size={24} />
-                            </button>
-                            <button
-                                onClick={handleDeleteMess}
-                                className="p-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                                title="Delete Selected Mess"
-                            >
-                                <Trash2 size={24} />
-                            </button>
+                            {userRole === 'super_admin' && (
+                                <>
+                                    <button
+                                        onClick={() => setShowAddModal(true)}
+                                        className="p-3 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                                        title="Add New Mess"
+                                    >
+                                        <Plus size={24} />
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteMess}
+                                        className="p-3 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                                        title="Delete Selected Mess"
+                                    >
+                                        <Trash2 size={24} />
+                                    </button>
+                                </>
+                            )}
                         </div>
 
                         <AnimatePresence mode="wait">
@@ -429,6 +521,59 @@ const AdminDashboard = () => {
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* History Modal */}
+            <AnimatePresence>
+                {showHistoryModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
+                                <div className="flex items-center gap-2">
+                                    <History className="text-orange-600" size={24} />
+                                    <h3 className="text-xl font-bold text-gray-900">Activity History</h3>
+                                </div>
+                                <button onClick={() => setShowHistoryModal(false)} className="text-gray-400 hover:text-gray-600">
+                                    <X size={24} />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto flex-1">
+                                {loadingHistory ? (
+                                    <div className="flex justify-center py-8">
+                                        <Loader2 className="animate-spin text-orange-500" size={32} />
+                                    </div>
+                                ) : auditLogs.length === 0 ? (
+                                    <p className="text-center text-gray-500 py-8">No activity recorded yet.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {auditLogs.map(log => (
+                                            <div key={log.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                                <div className="mt-1">
+                                                    <div className="bg-white p-2 rounded-full shadow-sm">
+                                                        <Clock size={16} className="text-gray-500" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">{log.details}</p>
+                                                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                                        <span className="font-semibold text-orange-600">{log.adminEmail}</span>
+                                                        <span>•</span>
+                                                        <span>{new Date(log.timestamp).toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </motion.div>
                     </div>
                 )}
