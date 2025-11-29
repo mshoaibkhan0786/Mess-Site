@@ -1,0 +1,84 @@
+import React, { useState } from 'react';
+import { Clock, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import clsx from 'clsx';
+import { Link } from 'react-router-dom';
+
+const MessCard = ({ mess }) => {
+    const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('en-US', { weekday: 'long' }));
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const currentDayMenu = mess.menu[selectedDay] || mess.menu['Monday'];
+
+    return (
+        <Link to={`/mess/${mess.id}`} className="h-[32rem] block">
+            <motion.div
+                layout
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                className="relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-300 cursor-pointer group h-full flex flex-col"
+            >
+                {/* Header */}
+                <div className={clsx("px-5 py-3 bg-gradient-to-r text-white transition-all duration-300", mess.color)}>
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-xl font-bold group-hover:scale-105 transition-transform duration-300">{mess.name}</h3>
+                        <div className="p-1.5 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
+                            <ArrowRight size={16} />
+                        </div>
+                    </div>
+                    <p className="mt-1 text-white/90 text-xs flex items-center gap-1">
+                        <Clock size={12} />
+                        Today's Special: {currentDayMenu.Lunch.split(',')[0]}
+                    </p>
+                </div>
+
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col">
+                    {/* Day Selector */}
+                    <div className="flex justify-between items-center w-full mb-3" onClick={(e) => e.preventDefault()}>
+                        {days.map(day => (
+                            <button
+                                key={day}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setSelectedDay(day);
+                                }}
+                                className={clsx(
+                                    "px-1.5 py-1 rounded-md text-[10px] font-medium transition-all",
+                                    selectedDay === day
+                                        ? "bg-gray-800 text-white shadow-md"
+                                        : "bg-white/50 text-gray-600 hover:bg-white/80"
+                                )}
+                            >
+                                {day.slice(0, 3)}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Daily Menu Preview */}
+                    <div className="flex flex-col gap-2.5 flex-1">
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                            <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Breakfast}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                            <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Lunch}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                            <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Snacks}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1">
+                            <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
+                            <p className="text-gray-800 font-medium text-xs leading-tight">{currentDayMenu.Dinner}</p>
+                        </div>
+                    </div>
+
+
+                </div>
+            </motion.div>
+        </Link>
+    );
+};
+
+export default MessCard;

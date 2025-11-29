@@ -1,0 +1,70 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Lock, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Navbar from '../components/Navbar';
+
+const AdminLogin = () => {
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleLogin = (e) => {
+        e.preventDefault();
+        if (password === 'admin') {
+            navigate('/admin/dashboard');
+        } else {
+            setError('Invalid password');
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50 relative flex flex-col">
+            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+                <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+            </div>
+
+            <Navbar />
+
+            <div className="flex-1 flex items-center justify-center relative z-10 px-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/50"
+                >
+                    <div className="text-center mb-8">
+                        <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Lock className="text-orange-600" size={32} />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900">Admin Login</h2>
+                        <p className="text-gray-500 mt-2">Enter your password to access the dashboard</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/50"
+                                placeholder="Password"
+                                autoFocus
+                            />
+                            {error && <p className="text-red-500 text-sm mt-2 ml-1">{error}</p>}
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                        >
+                            Login <ArrowRight size={20} />
+                        </button>
+                    </form>
+                </motion.div>
+            </div>
+        </div>
+    );
+};
+
+export default AdminLogin;
