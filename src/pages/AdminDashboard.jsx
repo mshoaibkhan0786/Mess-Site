@@ -68,10 +68,10 @@ const AdminDashboard = () => {
 
                 try {
                     // 2. Call Gemini API with Timeout
-                    console.log("VERSION: GEMINI-1.5-PRO"); // Version Check
+                    console.log("VERSION: GEMINI-2.0-FLASH"); // Version Check
                     const { GoogleGenerativeAI } = await import("@google/generative-ai");
                     const genAI = new GoogleGenerativeAI("AIzaSyBiZukqBjGS2nd2lyyVTCle02aHth6jrLQ");
-                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
                     const prompt = `
                     Extract the weekly menu from this image and return it as a strictly valid JSON object.
