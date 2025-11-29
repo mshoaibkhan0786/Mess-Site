@@ -171,33 +171,49 @@ const MessCard = ({ mess }) => {
                                     ))}
                                 </div>
 
-                                {/* Daily Menu Preview */}
-                                <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 pb-6 custom-scrollbar scrollbar-hide">
-                                    <style jsx>{`
-                                        .scrollbar-hide::-webkit-scrollbar {
-                                            display: none;
-                                        }
-                                        .scrollbar-hide {
-                                            -ms-overflow-style: none;
-                                            scrollbar-width: none;
-                                        }
-                                    `}</style>
-                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                        <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Breakfast)}</p>
-                                    </div>
-                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                        <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Lunch)}</p>
-                                    </div>
-                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                        <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Snacks)}</p>
-                                    </div>
-                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                        <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
-                                        <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(currentDayMenu.Dinner)}</p>
-                                    </div>
+                                {/* Daily Menu Preview - Grid Stack for Stable Height */}
+                                <div className="grid grid-cols-1 flex-1 min-h-0">
+                                    {days.map(day => {
+                                        const dayMenu = mess.menu[day] || mess.menu['Monday'];
+                                        const isSelected = selectedDay === day;
+
+                                        return (
+                                            <div
+                                                key={day}
+                                                className={clsx(
+                                                    "flex flex-col gap-2.5 overflow-y-auto pr-1 pb-2 custom-scrollbar scrollbar-hide transition-opacity duration-200",
+                                                    isSelected ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
+                                                )}
+                                                style={{ gridArea: "1 / 1 / 2 / 2" }}
+                                            >
+                                                <style jsx>{`
+                                                    .scrollbar-hide::-webkit-scrollbar {
+                                                        display: none;
+                                                    }
+                                                    .scrollbar-hide {
+                                                        -ms-overflow-style: none;
+                                                        scrollbar-width: none;
+                                                    }
+                                                `}</style>
+                                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 shrink-0">
+                                                    <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
+                                                    <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(dayMenu.Breakfast)}</p>
+                                                </div>
+                                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 shrink-0">
+                                                    <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
+                                                    <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(dayMenu.Lunch)}</p>
+                                                </div>
+                                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 shrink-0">
+                                                    <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
+                                                    <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(dayMenu.Snacks)}</p>
+                                                </div>
+                                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 shrink-0 mb-4">
+                                                    <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
+                                                    <p className="text-gray-800 font-medium text-xs leading-tight break-words">{toTitleCase(dayMenu.Dinner)}</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </>
                         );
