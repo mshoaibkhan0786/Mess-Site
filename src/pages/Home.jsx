@@ -59,8 +59,26 @@ const Home = () => {
             <main className="relative z-10 pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col min-h-[calc(100vh-80px)]">
                 <div className="flex-grow">
                     {loading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+                            {[1, 2, 3, 4, 5, 6].map((n) => (
+                                <div key={n} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 h-full flex flex-col">
+                                    <div className="h-48 w-full skeleton-loader"></div>
+                                    <div className="p-6 space-y-4 flex-grow">
+                                        <div className="flex justify-between items-start">
+                                            <div className="h-6 w-3/4 rounded skeleton-loader"></div>
+                                            <div className="h-6 w-16 rounded-full skeleton-loader"></div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="h-4 w-full rounded skeleton-loader"></div>
+                                            <div className="h-4 w-5/6 rounded skeleton-loader"></div>
+                                        </div>
+                                        <div className="pt-4 mt-auto flex justify-between items-center">
+                                            <div className="h-8 w-24 rounded-lg skeleton-loader"></div>
+                                            <div className="h-8 w-8 rounded-full skeleton-loader"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         <motion.div
