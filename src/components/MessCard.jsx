@@ -55,14 +55,15 @@ const MessCard = ({ mess }) => {
         return lunchSpecial || dinnerSpecial || "Special Meal";
     };
 
-    const shadowMap = {
-        annapoorna: 'hover:shadow-orange-500/40',
-        fc1: 'hover:shadow-blue-500/40',
-        fc2: 'hover:shadow-green-500/40',
-        ananya: 'hover:shadow-pink-500/40'
+    const colorMap = {
+        'from-orange-500 to-red-500': { text: 'text-orange-600', shadow: 'hover:shadow-orange-500/40', bg: 'bg-orange-50' },
+        'from-blue-500 to-cyan-500': { text: 'text-blue-600', shadow: 'hover:shadow-blue-500/40', bg: 'bg-blue-50' },
+        'from-green-500 to-emerald-500': { text: 'text-green-600', shadow: 'hover:shadow-green-500/40', bg: 'bg-green-50' },
+        'from-purple-500 to-pink-500': { text: 'text-purple-600', shadow: 'hover:shadow-purple-500/40', bg: 'bg-purple-50' },
+        'from-pink-500 to-rose-500': { text: 'text-pink-600', shadow: 'hover:shadow-pink-500/40', bg: 'bg-pink-50' }
     };
 
-    const shadowClass = shadowMap[mess.id] || 'hover:shadow-orange-500/40';
+    const theme = colorMap[mess.color] || colorMap['from-orange-500 to-red-500'];
 
     const toTitleCase = (str) => {
         if (!str) return '';
@@ -76,7 +77,7 @@ const MessCard = ({ mess }) => {
                 whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 className={clsx(
                     "relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-100 cursor-pointer group h-full flex flex-col",
-                    shadowClass
+                    theme.shadow
                 )}
             >
                 {/* Header */}
@@ -140,7 +141,7 @@ const MessCard = ({ mess }) => {
                         if (isExpired || !hasMenu) {
                             return (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
-                                    <div className="text-lg font-bold text-gray-400 mb-1">Menu Not Uploaded</div>
+                                    <div className={clsx("text-lg font-bold mb-1", theme.text)}>Menu Not Uploaded</div>
                                     <p className="text-xs text-gray-400">Check back later</p>
                                 </div>
                             );
