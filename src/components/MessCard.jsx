@@ -71,12 +71,13 @@ const MessCard = ({ mess }) => {
     };
 
     return (
-        <Link to={`/mess/${mess.id}`} className="h-[32rem] block">
+    return (
+        <Link to={`/mess/${mess.id}`} className="h-auto md:h-[32rem] block">
             <motion.div
                 layout
                 whileHover={{ y: -5, transition: { duration: 0.1 } }}
                 className={clsx(
-                    "relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-100 cursor-pointer group h-full flex flex-col",
+                    "relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-xl hover:shadow-2xl transition-all duration-100 cursor-pointer group h-full flex flex-col min-h-[32rem] md:min-h-0",
                     theme.shadow
                 )}
             >
@@ -141,7 +142,7 @@ const MessCard = ({ mess }) => {
                         if (isExpired || !hasMenu) {
                             return (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
-                                    <div className={clsx("text-lg font-bold mb-1", theme.text)}>Menu Not Uploaded</div>
+                                    <div className={clsx("text-lg font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r", mess.color)}>Menu Not Uploaded</div>
                                     <p className="text-xs text-gray-400">Check back later</p>
                                 </div>
                             );
@@ -172,7 +173,16 @@ const MessCard = ({ mess }) => {
                                 </div>
 
                                 {/* Daily Menu Preview */}
-                                <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                                <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 pb-4 custom-scrollbar scrollbar-hide">
+                                    <style jsx>{`
+                                        .scrollbar-hide::-webkit-scrollbar {
+                                            display: none;
+                                        }
+                                        .scrollbar-hide {
+                                            -ms-overflow-style: none;
+                                            scrollbar-width: none;
+                                        }
+                                    `}</style>
                                     <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
                                         <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
                                         <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Breakfast)}</p>
