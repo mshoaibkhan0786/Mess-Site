@@ -113,87 +113,87 @@ const MessCard = ({ mess }) => {
                     </p>
                 </div>
 
-            </div>
 
-            {/* Content */}
-            <div className="p-5 flex-1 flex flex-col">
-                {(() => {
-                    // Helper to get the start of the current week (Monday)
-                    const getStartOfWeek = () => {
-                        const now = new Date();
-                        const day = now.getDay();
-                        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-                        const monday = new Date(now.setDate(diff));
-                        monday.setHours(0, 0, 0, 0);
-                        return monday;
-                    };
 
-                    const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
-                    const startOfWeek = getStartOfWeek();
-                    const isExpired = !lastUpdated || lastUpdated < startOfWeek;
-                    const hasMenu = mess.menu && Object.keys(mess.menu).some(day => {
-                        const dayMenu = mess.menu[day];
-                        if (!dayMenu) return false;
-                        return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
-                    });
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col">
+                    {(() => {
+                        // Helper to get the start of the current week (Monday)
+                        const getStartOfWeek = () => {
+                            const now = new Date();
+                            const day = now.getDay();
+                            const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+                            const monday = new Date(now.setDate(diff));
+                            monday.setHours(0, 0, 0, 0);
+                            return monday;
+                        };
 
-                    if (isExpired || !hasMenu) {
+                        const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
+                        const startOfWeek = getStartOfWeek();
+                        const isExpired = !lastUpdated || lastUpdated < startOfWeek;
+                        const hasMenu = mess.menu && Object.keys(mess.menu).some(day => {
+                            const dayMenu = mess.menu[day];
+                            if (!dayMenu) return false;
+                            return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
+                        });
+
+                        if (isExpired || !hasMenu) {
+                            return (
+                                <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
+                                    <div className="text-lg font-bold text-gray-400 mb-1">Menu Not Uploaded</div>
+                                    <p className="text-xs text-gray-400">Check back later</p>
+                                </div>
+                            );
+                        }
+
                         return (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
-                                <div className="text-lg font-bold text-gray-400 mb-1">Menu Not Uploaded</div>
-                                <p className="text-xs text-gray-400">Check back later</p>
-                            </div>
+                            <>
+                                {/* Day Selector */}
+                                <div className="flex justify-between items-center w-full mb-3" onClick={(e) => e.preventDefault()}>
+                                    {days.map(day => (
+                                        <button
+                                            key={day}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setSelectedDay(day);
+                                            }}
+                                            className={clsx(
+                                                "px-1.5 py-1 rounded-md text-[10px] font-medium transition-all",
+                                                selectedDay === day
+                                                    ? "bg-gray-800 text-white shadow-md"
+                                                    : "bg-white/50 text-gray-600 hover:bg-white/80"
+                                            )}
+                                        >
+                                            {day.slice(0, 3)}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Daily Menu Preview */}
+                                <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
+                                        <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Breakfast)}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
+                                        <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Lunch)}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
+                                        <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Snacks)}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
+                                        <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
+                                        <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Dinner)}</p>
+                                    </div>
+                                </div>
+                            </>
                         );
-                    }
-
-                    return (
-                        <>
-                            {/* Day Selector */}
-                            <div className="flex justify-between items-center w-full mb-3" onClick={(e) => e.preventDefault()}>
-                                {days.map(day => (
-                                    <button
-                                        key={day}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            setSelectedDay(day);
-                                        }}
-                                        className={clsx(
-                                            "px-1.5 py-1 rounded-md text-[10px] font-medium transition-all",
-                                            selectedDay === day
-                                                ? "bg-gray-800 text-white shadow-md"
-                                                : "bg-white/50 text-gray-600 hover:bg-white/80"
-                                        )}
-                                    >
-                                        {day.slice(0, 3)}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Daily Menu Preview */}
-                            <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                    <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-0.5">Breakfast</h4>
-                                    <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Breakfast)}</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                    <h4 className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-0.5">Lunch</h4>
-                                    <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Lunch)}</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                    <h4 className="text-[10px] font-bold text-yellow-600 uppercase tracking-wider mb-0.5">Snacks</h4>
-                                    <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Snacks)}</p>
-                                </div>
-                                <div className="p-3 rounded-xl bg-white/60 border border-white/40 flex-1 min-h-0 shrink-0">
-                                    <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Dinner</h4>
-                                    <p className="text-gray-800 font-medium text-xs leading-tight">{toTitleCase(currentDayMenu.Dinner)}</p>
-                                </div>
-                            </div>
-                        </>
-                    );
-                })()}
-            </div>
-        </motion.div>
+                    })()}
+                </div>
+            </motion.div>
         </Link >
     );
 };
