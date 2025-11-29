@@ -9,6 +9,52 @@ const MessCard = ({ mess }) => {
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const currentDayMenu = mess.menu[selectedDay] || mess.menu['Monday'];
 
+    const getSpecialItem = (menu) => {
+        const specialKeywords = ['chicken', 'paneer', 'egg', 'sewaiya', 'kebab', 'ice cream'];
+        const excludedKeywords = ['chapati', 'steam rice', 'steamed rice', 'rice'];
+
+        const checkItem = (itemStr) => {
+            if (!itemStr) return null;
+            const items = itemStr.split(',').map(i => i.trim());
+
+            // First pass: Look for special keywords
+            for (const item of items) {
+                const lowerItem = item.toLowerCase();
+                if (specialKeywords.some(keyword => lowerItem.includes(keyword))) {
+                    return item;
+                }
+            }
+
+            // Second pass: Fallback to first non-excluded item
+            for (const item of items) {
+                const lowerItem = item.toLowerCase();
+                if (!excludedKeywords.some(keyword => lowerItem.includes(keyword))) {
+                    return item;
+                }
+            }
+
+            return items[0]; // Ultimate fallback
+        };
+
+        // Check Lunch then Dinner for specials
+        const lunchSpecial = checkItem(menu.Lunch);
+        const dinnerSpecial = checkItem(menu.Dinner);
+
+        // If lunch has a "special" keyword match, prioritize it. 
+        // Otherwise if dinner has one, use that.
+        // Else fallback to lunch's best item.
+
+        const isSpecial = (item) => {
+            if (!item) return false;
+            return specialKeywords.some(k => item.toLowerCase().includes(k));
+        };
+
+        if (isSpecial(lunchSpecial)) return lunchSpecial;
+        if (isSpecial(dinnerSpecial)) return dinnerSpecial;
+
+        return lunchSpecial || dinnerSpecial || "Special Meal";
+    };
+
     return (
         <Link to={`/mess/${mess.id}`} className="h-[32rem] block">
             <motion.div
@@ -26,7 +72,7 @@ const MessCard = ({ mess }) => {
                     </div>
                     <p className="mt-1 text-white/90 text-xs flex items-center gap-1">
                         <Clock size={12} />
-                        Today's Special: {currentDayMenu.Lunch.split(',')[0]}
+                        Today's Special: {getSpecialItem(currentDayMenu)}
                     </p>
                 </div>
 

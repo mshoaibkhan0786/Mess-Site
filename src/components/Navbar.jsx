@@ -99,24 +99,7 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                         </AnimatePresence>
 
                         <div className="flex items-center gap-2 md:gap-4">
-                            {/* Mobile Search Icon - Visible when search is closed */}
-                            {setSearchTerm && !isSearchOpen && (
-                                <button
-                                    onClick={() => setIsSearchOpen(true)}
-                                    className="md:hidden p-2 text-gray-600 hover:text-orange-600 transition-colors"
-                                >
-                                    <Search size={20} />
-                                </button>
-                            )}
 
-                            {/* Restaurant Icon - Mobile Only */}
-                            <button
-                                onClick={() => setShowRestaurantsModal(true)}
-                                className="md:hidden p-2 text-gray-600 hover:text-orange-600 transition-colors"
-                                title="Restaurants"
-                            >
-                                <Store size={20} />
-                            </button>
 
                             {/* Map Icon Link */}
                             <a
@@ -129,63 +112,60 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                                 <Map size={20} />
                             </a>
 
-                            <button
-                                onClick={() => setShowRestaurantsModal(true)}
-                                className="hidden md:block px-4 py-2 text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors"
-                            >
-                                Restaurants
+                            {/* Restaurant Icon - Mobile Only */}
+                        </button>
+                        <Link to="/admin">
+                            <button className="hidden md:block px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300">
+                                Admin Login
                             </button>
-                            <Link to="/admin">
-                                <button className="hidden md:block px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300">
-                                    Admin Login
-                                </button>
-                            </Link>
-                        </div>
+                        </Link>
                     </div>
                 </div>
-            </nav>
+            </div>
+        </nav >
 
-            {/* Restaurants Modal */}
-            <AnimatePresence>
-                {showRestaurantsModal && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowRestaurantsModal(false)}>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col"
-                        >
-                            <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 text-white flex justify-between items-center shrink-0">
-                                <div>
-                                    <h3 className="text-2xl font-bold">Nearby Restaurants</h3>
-                                    <p className="text-white/80 text-sm">Tap a card to call</p>
-                                </div>
-                                <button onClick={() => setShowRestaurantsModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
-                                    <X size={24} />
-                                </button>
+            {/* Restaurants Modal */ }
+            < AnimatePresence >
+            { showRestaurantsModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowRestaurantsModal(false)}>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col"
+                    >
+                        <div className="p-6 bg-gradient-to-r from-orange-500 to-red-500 text-white flex justify-between items-center shrink-0">
+                            <div>
+                                <h3 className="text-2xl font-bold">Nearby Restaurants</h3>
+                                <p className="text-white/80 text-sm">Tap a card to call</p>
                             </div>
-                            <div className="p-6 overflow-y-auto">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {restaurants.map((restaurant, index) => (
-                                        <a
-                                            key={index}
-                                            href={`tel:${restaurant.phone}`}
-                                            className="block p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 group"
-                                        >
-                                            <h4 className="font-bold text-gray-800 group-hover:text-orange-600 transition-colors mb-1">{restaurant.name}</h4>
-                                            <p className="text-sm text-gray-500 flex items-center gap-2">
-                                                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                                {restaurant.phone}
-                                            </p>
-                                        </a>
-                                    ))}
-                                </div>
+                            <button onClick={() => setShowRestaurantsModal(false)} className="p-2 hover:bg-white/20 rounded-full transition-colors">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {restaurants.map((restaurant, index) => (
+                                    <a
+                                        key={index}
+                                        href={`tel:${restaurant.phone}`}
+                                        className="block p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 group"
+                                    >
+                                        <h4 className="font-bold text-gray-800 group-hover:text-orange-600 transition-colors mb-1">{restaurant.name}</h4>
+                                        <p className="text-sm text-gray-500 flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                            {restaurant.phone}
+                                        </p>
+                                    </a>
+                                ))}
                             </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                        </div>
+                    </motion.div>
+                </div>
+            )
+}
+            </AnimatePresence >
         </>
     );
 };
