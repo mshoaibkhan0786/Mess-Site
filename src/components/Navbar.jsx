@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UtensilsCrossed, Search, X, Map } from 'lucide-react';
+import { UtensilsCrossed, Search, X, Map, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -38,9 +38,14 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                                     className="flex items-center gap-2"
                                 >
                                     <Link to="/" className="flex items-center gap-2">
-                                        <div className="p-2 bg-orange-500 rounded-lg text-white">
+                                        {/* Desktop Icon - Part of Home Link */}
+                                        <div className="hidden md:block p-2 bg-orange-500 rounded-lg text-white">
                                             <UtensilsCrossed size={24} />
                                         </div>
+                                        {/* Mobile Icon - Links to Admin */}
+                                        <Link to="/admin" className="md:hidden p-2 bg-orange-500 rounded-lg text-white" onClick={(e) => e.stopPropagation()}>
+                                            <UtensilsCrossed size={24} />
+                                        </Link>
                                         <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                                             MIT Mess
                                         </span>
@@ -103,6 +108,15 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                                     <Search size={20} />
                                 </button>
                             )}
+
+                            {/* Restaurant Icon - Mobile Only */}
+                            <button
+                                onClick={() => setShowRestaurantsModal(true)}
+                                className="md:hidden p-2 text-gray-600 hover:text-orange-600 transition-colors"
+                                title="Restaurants"
+                            >
+                                <Store size={20} />
+                            </button>
 
                             {/* Map Icon Link */}
                             <a
