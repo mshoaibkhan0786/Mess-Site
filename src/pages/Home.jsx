@@ -111,22 +111,22 @@ const Home = () => {
                                         <Link
                                             key={item.id}
                                             to={`/mess/${item.id}`}
-                                            className="block p-6 rounded-2xl bg-white border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 group h-fit"
+                                            className={`block p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 group h-fit bg-gradient-to-r ${item.color || 'from-orange-500 to-red-500'}`}
                                         >
                                             <div>
                                                 <div className="flex justify-between items-start mb-4">
-                                                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                                                    <h3 className="text-xl font-bold text-white group-hover:scale-105 transition-transform origin-left">
                                                         {item.name}
                                                     </h3>
-                                                    <div className="p-2 bg-orange-100 rounded-full text-orange-600">
+                                                    <div className="p-2 bg-white/20 rounded-full text-white backdrop-blur-sm">
                                                         <UtensilsCrossed size={20} />
                                                     </div>
                                                 </div>
-                                                <p className="text-gray-500 text-sm">View Weekly Menu</p>
+                                                <p className="text-white/80 text-sm font-medium">View Weekly Menu</p>
                                             </div>
-                                            <div className="mt-6 pt-4 border-t border-gray-100 flex items-center text-gray-600 font-medium">
-                                                <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                                                Click to view details
+                                            <div className="mt-6 pt-4 border-t border-white/20 flex items-center text-white/90 font-medium">
+                                                <span className="w-2 h-2 rounded-full bg-white/50 mr-2"></span>
+                                                Tap to open
                                             </div>
                                         </Link>
                                     ) : (
