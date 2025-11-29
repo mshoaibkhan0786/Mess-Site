@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { X, Shield, UserPlus, AlertTriangle, Trash2, Lock, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -32,7 +32,9 @@ const AccessCodeManager = ({ onClose }) => {
 
     const fetchUsers = async () => {
         const userSnapshot = await getDocs(collection(db, "users"));
-        const usersData = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const usersData = userSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(user => !user.deleted); // Filter out soft-deleted users
         setUsers(usersData);
     };
 
@@ -63,7 +65,8 @@ const AccessCodeManager = ({ onClose }) => {
                 accessCode: newCode, // Storing password for superadmin visibility
                 role: selectedRole,
                 messId: selectedRole === 'mess_admin' ? selectedMess : null,
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                deleted: false
             });
 
             alert(`Success! Access Code "${newCode}" created for "${newName}". You will now be logged out.`);
@@ -85,8 +88,8 @@ const AccessCodeManager = ({ onClose }) => {
         }
 
         try {
-            // Soft delete: Remove from Firestore. Auth user remains but login is blocked by AdminLogin check.
-            await deleteDoc(doc(db, "users", userId));
+            // Soft delete: Mark as deleted in Firestore.
+            await updateDoc(doc(db, "users", userId), { deleted: true });
             setUsers(users.filter(user => user.id !== userId));
             setSelectedUser(null); // Close modal if open
             alert(`Admin "${userName}" deleted successfully.`);
