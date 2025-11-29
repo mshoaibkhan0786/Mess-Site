@@ -99,7 +99,7 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                         </AnimatePresence>
 
                         <div className="flex items-center gap-2 md:gap-4">
-                            {/* Map Icon Link - Swapped position with Search */}
+                            {/* Map Icon Link */}
                             <a
                                 href="https://mit.nakshatramaps.com/"
                                 target="_blank"
@@ -110,6 +110,15 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                                 <Map size={20} />
                             </a>
 
+                            {/* Restaurant Icon - Mobile Only */}
+                            <button
+                                onClick={() => setShowRestaurantsModal(true)}
+                                className="md:hidden p-2 text-gray-600 hover:text-orange-600 transition-colors"
+                                title="Restaurants"
+                            >
+                                <Store size={20} />
+                            </button>
+
                             {/* Mobile Search Icon - Visible when search is closed */}
                             {setSearchTerm && !isSearchOpen && (
                                 <button
@@ -119,15 +128,6 @@ const Navbar = ({ searchTerm, setSearchTerm }) => {
                                     <Search size={20} />
                                 </button>
                             )}
-
-                            {/* Restaurant Icon - Mobile Only */}
-                            <button
-                                onClick={() => setShowRestaurantsModal(true)}
-                                className="md:hidden p-2 text-gray-600 hover:text-orange-600 transition-colors"
-                                title="Restaurants"
-                            >
-                                <Store size={20} />
-                            </button>
 
                             <button
                                 onClick={() => setShowRestaurantsModal(true)}
