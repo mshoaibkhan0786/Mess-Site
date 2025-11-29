@@ -75,6 +75,13 @@ const AdminDashboard = () => {
 
                     const prompt = `
                     Extract the weekly menu from this image and return it as a strictly valid JSON object.
+                    
+                    CRITICAL INSTRUCTION: You must extract EVERY SINGLE DISH listed for each meal. 
+                    - Do NOT summarize. 
+                    - Do NOT truncate. 
+                    - List all items separated by commas exactly as they appear in the image.
+                    - If there are multiple items (e.g., "Rice, Dal, Curd"), include ALL of them.
+
                     The JSON structure must be exactly like this:
                     {
                         "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
