@@ -241,33 +241,67 @@ const AdminDashboard = () => {
                     const genAI = new GoogleGenerativeAI(apiKey);
                     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-                    const prompt = `
-                    Extract the menu from this image. This is a 10-day menu cycle.
-                    
-                    **CRITICAL INSTRUCTIONS:**
-                    1.  **Start Date**: Extract the start date of the menu (e.g., "1st December 2025") and format it as "YYYY-MM-DD" (e.g., "2025-12-01").
-                    2.  **Theme Dinner**: If a meal slot says "Theme Dinner" (or similar), set the value to EXACTLY "Theme Dinner". Do not list other items if it's a theme dinner.
-                    3.  **10-Day Cycle**: 
-                        - Extract the first 7 days into the "menu" object.
-                        - Extract the remaining days (Days 8, 9, 10, etc.) into the "nextWeekMenu" object, mapping them to their respective day names (e.g., if Day 1 is Monday, Day 8 is Monday).
-                    4.  **Dishes**: List every single dish. Sentence case. No ALL CAPS.
-                    
-                    **JSON Structure:**
-                    {
-                        "startDate": "YYYY-MM-DD",
-                        "menu": {
-                            "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
-                            ... (Days 1-7)
-                        },
-                        "nextWeekMenu": {
-                            "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
-                            ... (Days 8-10, mapped to day names)
+                    // Find the selected mess to check its name
+                    const currentMess = messes.find(m => m.id === selectedMess);
+                    const isFC1 = currentMess?.name?.toLowerCase().includes('fc1') || currentMess?.name?.toLowerCase().includes('food court 1');
+
+                    let prompt;
+                    if (isFC1) {
+                        prompt = `
+                        Extract the menu from this image. This is a 10-day menu cycle.
+                        
+                        **CRITICAL INSTRUCTIONS:**
+                        1.  **Start Date**: Extract the start date of the menu (e.g., "1st December 2025") and format it as "YYYY-MM-DD" (e.g., "2025-12-01").
+                        2.  **Theme Dinner**: If a meal slot says "Theme Dinner" (or similar), set the value to EXACTLY "Theme Dinner". Do not list other items if it's a theme dinner.
+                        3.  **10-Day Cycle**: 
+                            - Extract the first 7 days into the "menu" object.
+                            - Extract the remaining days (Days 8, 9, 10, etc.) into the "nextWeekMenu" object, mapping them to their respective day names (e.g., if Day 1 is Monday, Day 8 is Monday).
+                        4.  **Dishes**: List every single dish. Sentence case. No ALL CAPS.
+                        
+                        **JSON Structure:**
+                        {
+                            "startDate": "YYYY-MM-DD",
+                            "menu": {
+                                "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                ... (Days 1-7)
+                            },
+                            "nextWeekMenu": {
+                                "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                ... (Days 8-10, mapped to day names)
+                            }
                         }
+                        
+                        If a meal is missing, use "N/A".
+                        Return ONLY raw JSON.
+                        `;
+                    } else {
+                        prompt = `
+                        Extract the weekly menu from this image and return it as a strictly valid JSON object.
+                        
+                        CRITICAL INSTRUCTION: You must extract EVERY SINGLE DISH listed for each meal. 
+                        - Do NOT summarize. 
+                        - Do NOT truncate. 
+                        - List all items separated by commas exactly as they appear in the image.
+                        - If there are multiple items (e.g., "Rice, Dal, Curd"), include ALL of them.
+                        - **IMPORTANT: Format all text in Sentence case (e.g., "Paneer butter masala", "Mix veg paratha"). Do NOT use ALL CAPS.**
+                        - **Theme Dinner**: If a meal slot says "Theme Dinner" (or similar), set the value to EXACTLY "Theme Dinner".
+
+                        The JSON structure must be exactly like this:
+                        {
+                            "menu": {
+                                "Monday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                "Tuesday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                "Wednesday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                "Thursday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                "Friday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                "Saturday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." },
+                                "Sunday": { "Breakfast": "...", "Lunch": "...", "Snacks": "...", "Dinner": "..." }
+                            }
+                        }
+                        If a meal is missing, use "N/A".
+                        Do not include any markdown formatting (like \`\`\`json), just the raw JSON string.
+                        `;
                     }
-                    
-                    If a meal is missing, use "N/A".
-                    Return ONLY raw JSON.
-                    `;
 
                     // Timeout Promise
                     const timeout = new Promise((_, reject) =>
@@ -304,12 +338,25 @@ const AdminDashboard = () => {
 
                     // 3. Update Firestore
                     const messRef = doc(db, "messes", selectedMess);
-                    await updateDoc(messRef, {
-                        menu: parsedData.menu,
-                        nextWeekMenu: parsedData.nextWeekMenu || {},
-                        menuStartDate: parsedData.startDate || new Date().toISOString().split('T')[0],
+
+                    // Prepare update data
+                    const updateData = {
                         lastUpdated: new Date().toISOString()
-                    });
+                    };
+
+                    if (isFC1) {
+                        updateData.menu = parsedData.menu;
+                        updateData.nextWeekMenu = parsedData.nextWeekMenu || {};
+                        updateData.menuStartDate = parsedData.startDate || new Date().toISOString().split('T')[0];
+                    } else {
+                        // Handle structure difference if prompt returns just the menu object or nested
+                        // The standard prompt asks for { menu: ... } now to match structure, or we adjust
+                        updateData.menu = parsedData.menu || parsedData; // Fallback if AI returns direct object
+                        updateData.nextWeekMenu = {}; // Clear next week menu for non-FC1
+                        updateData.menuStartDate = null; // Clear start date
+                    }
+
+                    await updateDoc(messRef, updateData);
 
                     const messName = messes.find(m => m.id === selectedMess)?.name || selectedMess;
                     await logAction("UPDATE_MENU", `Updated menu for ${messName}`, selectedMess);
