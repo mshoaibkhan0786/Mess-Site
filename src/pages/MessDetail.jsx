@@ -97,100 +97,180 @@ const MessDetail = () => {
                                     className="flex-1 md:flex-none justify-center px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-full text-[10px] md:text-xs font-medium transition-colors backdrop-blur-sm border border-white/20 flex items-center gap-1"
                                 >
                                     <UtensilsCrossed size={12} />
-                                    <AnimatePresence>
-                                        {showTodayModal && (
-                                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowTodayModal(false)}>
-                                                <motion.div
-                                                    initial={{ opacity: 0, scale: 0.9 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    exit={{ opacity: 0, scale: 0.9 }}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
-                                                >
-                                                    <div className={clsx("p-4 bg-gradient-to-r text-white flex justify-between items-center", mess.color)}>
-                                                        <h3 className="text-lg font-bold">Today's Menu ({new Date().toLocaleDateString('en-US', { weekday: 'long' })})</h3>
-                                                        <button onClick={() => setShowTodayModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
-                                                            <X size={20} />
-                                                        </button>
-                                                    </div>
-                                                    <div className="p-6 space-y-4">
-                                                        {(() => {
-                                                            // Helper to get the start of the current week (Monday)
-                                                            const getStartOfWeek = () => {
-                                                                const now = new Date();
-                                                                const day = now.getDay();
-                                                                const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-                                                                const monday = new Date(now.setDate(diff));
-                                                                monday.setHours(0, 0, 0, 0);
-                                                                return monday;
-                                                            };
-
-                                                            // Determine which menu to show based on 10-day cycle
-                                                            const getActiveMenu = () => {
-                                                                if (!mess.menuStartDate || !mess.nextWeekMenu) return mess.menu;
-
-                                                                const startDate = new Date(mess.menuStartDate);
-                                                                const today = new Date();
-                                                                const diffTime = Math.abs(today - startDate);
-                                                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                                                                if (diffDays > 7 && Object.keys(mess.nextWeekMenu).length > 0) {
-                                                                    return { ...mess.menu, ...mess.nextWeekMenu };
-                                                                }
-                                                                return mess.menu;
-                                                            };
-
-                                                            const activeMenu = getActiveMenu();
-
-                                                            const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
-                                                            const startOfWeek = getStartOfWeek();
-                                                            const isExpired = !lastUpdated || lastUpdated < startOfWeek;
-                                                            const hasMenu = activeMenu && Object.keys(activeMenu).some(day => {
-                                                                const dayMenu = activeMenu[day];
-                                                                if (!dayMenu) return false;
-                                                                return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
-                                                            });
-
-                                                            if (isExpired || !hasMenu) {
-                                                                return (
-                                                                    <div className="flex flex-col items-center justify-center p-8 text-center">
-                                                                        <div className="text-xl font-bold text-gray-400 mb-2">Menu Not Uploaded</div>
-                                                                        <p className="text-sm text-gray-400">Check back later</p>
-                                                                    </div>
-                                                                );
-                                                            }
-
-                                                            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-                                                            const todayMenu = activeMenu[today] || activeMenu['Monday'];
-
-                                                            return (
-                                                                <>
-                                                                    <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
-                                                                        <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
-                                                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Breakfast)}</p>
-                                                                    </div>
-                                                                    <div className="p-3 rounded-xl bg-green-50 border border-green-100">
-                                                                        <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
-                                                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Lunch)}</p>
-                                                                    </div>
-                                                                    <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
-                                                                        <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
-                                                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Snacks)}</p>
-                                                                    </div>
-                                                                    <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
-                                                                        <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
-                                                                        <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Dinner)}</p>
-                                                                    </div>
-                                                                </>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                </motion.div>
-                                            </div>
-                                        )}
-                                    </AnimatePresence>
+                                    Today's Menu
+                                </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className={clsx("flex-1 relative bg-gray-50/50", isMobile ? "overflow-hidden" : "overflow-auto")}>
+                        {(() => {
+                            // Helper to get the start of the current week (Monday)
+                            const getStartOfWeek = () => {
+                                const now = new Date();
+                                const day = now.getDay();
+                                const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+                                const monday = new Date(now.setDate(diff));
+                                monday.setHours(0, 0, 0, 0);
+                                return monday;
+                            };
+
+                            // Determine which menu to show based on 10-day cycle
+                            const getActiveMenu = () => {
+                                if (!mess.menuStartDate || !mess.nextWeekMenu) return mess.menu;
+
+                                const startDate = new Date(mess.menuStartDate);
+                                const today = new Date();
+                                const diffTime = Math.abs(today - startDate);
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                if (diffDays > 7 && Object.keys(mess.nextWeekMenu).length > 0) {
+                                    return { ...mess.menu, ...mess.nextWeekMenu };
+                                }
+                                return mess.menu;
+                            };
+
+                            const activeMenu = getActiveMenu();
+
+                            const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
+                            const startOfWeek = getStartOfWeek();
+                            const isExpired = !lastUpdated || lastUpdated < startOfWeek;
+                            const hasMenu = activeMenu && Object.keys(activeMenu).some(day => {
+                                const dayMenu = activeMenu[day];
+                                if (!dayMenu) return false;
+                                return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
+                            });
+
+                            if (isExpired || !hasMenu) {
+                                return (
+                                    <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                                        <div className={clsx("text-3xl md:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r", mess.color)}>
+                                            Menu Not Uploaded
+                                        </div>
+                                        <p className="text-gray-400 text-sm md:text-base">
+                                            Check back later for this week's menu
+                                        </p>
+                                    </div>
+                                );
+                            }
+
+                            return isMobile ? (
+                                <TransformWrapper
+                                    ref={transformComponentRef}
+                                    initialScale={1}
+                                    minScale={0.5}
+                                    maxScale={3}
+                                    centerOnInit={false}
+                                    wheel={{ step: 0.1 }}
+                                    limitToBounds={false}
+                                >
+                                    <TransformComponent wrapperClass="!w-full !h-full" contentClass="!w-full">
+                                        <MenuTable days={days} mess={{ ...mess, menu: activeMenu }} />
+                                    </TransformComponent>
+                                </TransformWrapper>
+                            ) : (
+                                <MenuTable days={days} mess={{ ...mess, menu: activeMenu }} />
                             );
+                        })()}
+                    </div>
+                </motion.div>
+            </main>
+
+            {/* Today's Menu Modal */}
+            <AnimatePresence>
+                {showTodayModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowTodayModal(false)}>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                        >
+                            <div className={clsx("p-4 bg-gradient-to-r text-white flex justify-between items-center", mess.color)}>
+                                <h3 className="text-lg font-bold">Today's Menu ({new Date().toLocaleDateString('en-US', { weekday: 'long' })})</h3>
+                                <button onClick={() => setShowTodayModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {(() => {
+                                    // Helper to get the start of the current week (Monday)
+                                    const getStartOfWeek = () => {
+                                        const now = new Date();
+                                        const day = now.getDay();
+                                        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+                                        const monday = new Date(now.setDate(diff));
+                                        monday.setHours(0, 0, 0, 0);
+                                        return monday;
+                                    };
+
+                                    // Determine which menu to show based on 10-day cycle
+                                    const getActiveMenu = () => {
+                                        if (!mess.menuStartDate || !mess.nextWeekMenu) return mess.menu;
+
+                                        const startDate = new Date(mess.menuStartDate);
+                                        const today = new Date();
+                                        const diffTime = Math.abs(today - startDate);
+                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                        if (diffDays > 7 && Object.keys(mess.nextWeekMenu).length > 0) {
+                                            return { ...mess.menu, ...mess.nextWeekMenu };
+                                        }
+                                        return mess.menu;
+                                    };
+
+                                    const activeMenu = getActiveMenu();
+
+                                    const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
+                                    const startOfWeek = getStartOfWeek();
+                                    const isExpired = !lastUpdated || lastUpdated < startOfWeek;
+                                    const hasMenu = activeMenu && Object.keys(activeMenu).some(day => {
+                                        const dayMenu = activeMenu[day];
+                                        if (!dayMenu) return false;
+                                        return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
+                                    });
+
+                                    if (isExpired || !hasMenu) {
+                                        return (
+                                            <div className="flex flex-col items-center justify-center p-8 text-center">
+                                                <div className="text-xl font-bold text-gray-400 mb-2">Menu Not Uploaded</div>
+                                                <p className="text-sm text-gray-400">Check back later</p>
+                                            </div>
+                                        );
+                                    }
+
+                                    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+                                    const todayMenu = activeMenu[today] || activeMenu['Monday'];
+
+                                    return (
+                                        <>
+                                            <div className="p-3 rounded-xl bg-orange-50 border border-orange-100">
+                                                <h4 className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-1">Breakfast</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Breakfast)}</p>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-green-50 border border-green-100">
+                                                <h4 className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1">Lunch</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Lunch)}</p>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-yellow-50 border border-yellow-100">
+                                                <h4 className="text-xs font-bold text-yellow-600 uppercase tracking-wider mb-1">Snacks</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Snacks)}</p>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100">
+                                                <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Dinner</h4>
+                                                <p className="text-gray-800 text-sm">{toTitleCase(todayMenu.Dinner)}</p>
+                                            </div>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
 };
 
 const toTitleCase = (str) => {
@@ -198,29 +278,29 @@ const toTitleCase = (str) => {
     return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
-                            const MenuTable = ({days, mess}) => (
-                            <table className="w-full text-left border-collapse min-w-[600px] bg-white origin-top-left h-full">
-                                <thead className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-10">
-                                    <tr className="border-b border-gray-200">
-                                        <th className="py-2 px-3 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Day</th>
-                                        <th className="py-2 px-3 font-bold text-orange-600 uppercase tracking-wider text-[10px]">Breakfast</th>
-                                        <th className="py-2 px-3 font-bold text-green-600 uppercase tracking-wider text-[10px]">Lunch</th>
-                                        <th className="py-2 px-3 font-bold text-yellow-600 uppercase tracking-wider text-[10px]">Snacks</th>
-                                        <th className="py-2 px-3 font-bold text-blue-600 uppercase tracking-wider text-[10px]">Dinner</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {days.map(day => (
-                                        <tr key={day} id={`row-${day}`} className="hover:bg-gray-50 transition-colors group duration-300">
-                                            <td className="py-1.5 px-3 font-bold text-gray-800 text-[10px]">{day}</td>
-                                            <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Breakfast)}</td>
-                                            <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Lunch)}</td>
-                                            <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Snacks)}</td>
-                                            <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Dinner)}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            );
+const MenuTable = ({ days, mess }) => (
+    <table className="w-full text-left border-collapse min-w-[600px] bg-white origin-top-left h-full">
+        <thead className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+            <tr className="border-b border-gray-200">
+                <th className="py-2 px-3 font-bold text-gray-500 uppercase tracking-wider text-[10px]">Day</th>
+                <th className="py-2 px-3 font-bold text-orange-600 uppercase tracking-wider text-[10px]">Breakfast</th>
+                <th className="py-2 px-3 font-bold text-green-600 uppercase tracking-wider text-[10px]">Lunch</th>
+                <th className="py-2 px-3 font-bold text-yellow-600 uppercase tracking-wider text-[10px]">Snacks</th>
+                <th className="py-2 px-3 font-bold text-blue-600 uppercase tracking-wider text-[10px]">Dinner</th>
+            </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+            {days.map(day => (
+                <tr key={day} id={`row-${day}`} className="hover:bg-gray-50 transition-colors group duration-300">
+                    <td className="py-1.5 px-3 font-bold text-gray-800 text-[10px]">{day}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Breakfast)}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Lunch)}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Snacks)}</td>
+                    <td className="py-1.5 px-3 text-gray-600 group-hover:text-gray-900 text-[10px] leading-tight">{toTitleCase(mess.menu[day]?.Dinner)}</td>
+                </tr>
+            ))}
+        </tbody>
+    </table>
+);
 
-                            export default MessDetail;
+export default MessDetail;
