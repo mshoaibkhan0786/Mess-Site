@@ -104,56 +104,73 @@ const MessDetail = () => {
                     </div>
 
                     <div className={clsx("flex-1 relative bg-gray-50/50", isMobile ? "overflow-hidden" : "overflow-auto")}>
-                        {(() => {
+                            // Determine which menu to show based on 10-day cycle
+                            const getActiveMenu = () => {
+                                if (!mess.menuStartDate || !mess.nextWeekMenu) return mess.menu;
+
+                        const startDate = new Date(mess.menuStartDate);
+                        const today = new Date();
+                        const diffTime = Math.abs(today - startDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                // If we are past the first 7 days, check if we have next week's data
+                                if (diffDays > 7 && Object.keys(mess.nextWeekMenu).length > 0) {
+                                    return {...mess.menu, ...mess.nextWeekMenu };
+                                }
+                        return mess.menu;
+                            };
+
+                        const activeMenu = getActiveMenu();
+
                             // Helper to get the start of the current week (Monday)
                             const getStartOfWeek = () => {
                                 const now = new Date();
-                                const day = now.getDay();
-                                const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-                                const monday = new Date(now.setDate(diff));
-                                monday.setHours(0, 0, 0, 0);
-                                return monday;
+                        const day = now.getDay();
+                        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+                        const monday = new Date(now.setDate(diff));
+                        monday.setHours(0, 0, 0, 0);
+                        return monday;
                             };
 
-                            const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
-                            const startOfWeek = getStartOfWeek();
-                            const isExpired = !lastUpdated || lastUpdated < startOfWeek;
-                            const hasMenu = mess.menu && Object.keys(mess.menu).some(day => {
-                                const dayMenu = mess.menu[day];
-                                if (!dayMenu) return false;
+                        const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
+                        const startOfWeek = getStartOfWeek();
+                        const isExpired = !lastUpdated || lastUpdated < startOfWeek;
+                            const hasMenu = activeMenu && Object.keys(activeMenu).some(day => {
+                                const dayMenu = activeMenu[day];
+                        if (!dayMenu) return false;
                                 return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
                             });
 
-                            if (isExpired || !hasMenu) {
+                        if (isExpired || !hasMenu) {
                                 return (
-                                    <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                                        <div className={clsx("text-3xl md:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r", mess.color)}>
-                                            Menu Not Uploaded
-                                        </div>
-                                        <p className="text-gray-400 text-sm md:text-base">
-                                            Check back later for this week's menu
-                                        </p>
-                                    </div>
-                                );
+                        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                            <div className={clsx("text-3xl md:text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r", mess.color)}>
+                                Menu Not Uploaded
+                            </div>
+                            <p className="text-gray-400 text-sm md:text-base">
+                                Check back later for this week's menu
+                            </p>
+                        </div>
+                        );
                             }
 
-                            return isMobile ? (
-                                <TransformWrapper
-                                    ref={transformComponentRef}
-                                    initialScale={1}
-                                    minScale={0.5}
-                                    maxScale={3}
-                                    centerOnInit={false}
-                                    wheel={{ step: 0.1 }}
-                                    limitToBounds={false}
-                                >
-                                    <TransformComponent wrapperClass="!w-full !h-full" contentClass="!w-full">
-                                        <MenuTable days={days} mess={mess} />
-                                    </TransformComponent>
-                                </TransformWrapper>
-                            ) : (
-                                <MenuTable days={days} mess={mess} />
-                            );
+                        return isMobile ? (
+                        <TransformWrapper
+                            ref={transformComponentRef}
+                            initialScale={1}
+                            minScale={0.5}
+                            maxScale={3}
+                            centerOnInit={false}
+                            wheel={{ step: 0.1 }}
+                            limitToBounds={false}
+                        >
+                            <TransformComponent wrapperClass="!w-full !h-full" contentClass="!w-full">
+                                <MenuTable days={days} mess={{ ...mess, menu: activeMenu }} />
+                            </TransformComponent>
+                        </TransformWrapper>
+                        ) : (
+                        <MenuTable days={days} mess={{ ...mess, menu: activeMenu }} />
+                        );
                         })()}
                     </div>
                 </motion.div>
@@ -188,11 +205,28 @@ const MessDetail = () => {
                                         return monday;
                                     };
 
+                                    // Determine which menu to show based on 10-day cycle
+                                    const getActiveMenu = () => {
+                                        if (!mess.menuStartDate || !mess.nextWeekMenu) return mess.menu;
+
+                                        const startDate = new Date(mess.menuStartDate);
+                                        const today = new Date();
+                                        const diffTime = Math.abs(today - startDate);
+                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                        if (diffDays > 7 && Object.keys(mess.nextWeekMenu).length > 0) {
+                                            return { ...mess.menu, ...mess.nextWeekMenu };
+                                        }
+                                        return mess.menu;
+                                    };
+
+                                    const activeMenu = getActiveMenu();
+
                                     const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
                                     const startOfWeek = getStartOfWeek();
                                     const isExpired = !lastUpdated || lastUpdated < startOfWeek;
-                                    const hasMenu = mess.menu && Object.keys(mess.menu).some(day => {
-                                        const dayMenu = mess.menu[day];
+                                    const hasMenu = activeMenu && Object.keys(activeMenu).some(day => {
+                                        const dayMenu = activeMenu[day];
                                         if (!dayMenu) return false;
                                         return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
                                     });
@@ -207,7 +241,7 @@ const MessDetail = () => {
                                     }
 
                                     const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-                                    const todayMenu = mess.menu[today] || mess.menu['Monday'];
+                                    const todayMenu = activeMenu[today] || activeMenu['Monday'];
 
                                     return (
                                         <>

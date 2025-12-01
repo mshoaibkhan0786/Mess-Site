@@ -7,9 +7,33 @@ import { Link } from 'react-router-dom';
 const MessCard = ({ mess }) => {
     const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString('en-US', { weekday: 'long' }));
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const currentDayMenu = mess.menu[selectedDay] || mess.menu['Monday'];
+    // Determine which menu to show based on 10-day cycle
+    const getActiveMenu = () => {
+        if (!mess.menuStartDate || !mess.nextWeekMenu) return mess.menu;
+
+        const startDate = new Date(mess.menuStartDate);
+        const today = new Date();
+        const diffTime = Math.abs(today - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // If we are past the first 7 days, check if we have next week's data
+        if (diffDays > 7 && Object.keys(mess.nextWeekMenu).length > 0) {
+            // Merge next week's available days into the main menu structure
+            // This ensures we fallback to main menu if a day is missing in nextWeekMenu (though ideally it shouldn't be)
+            return { ...mess.menu, ...mess.nextWeekMenu };
+        }
+        return mess.menu;
+    };
+
+    const activeMenu = getActiveMenu();
+    const currentDayMenu = activeMenu[selectedDay] || activeMenu['Monday'];
 
     const getSpecialItem = (menu) => {
+        // Priority check for Theme Dinner
+        if (menu.Dinner?.toLowerCase().includes('theme dinner')) {
+            return "Theme Dinner";
+        }
+
         // Priority check for Month End Dinner
         const allItems = [menu.Breakfast, menu.Lunch, menu.Snacks, menu.Dinner].join(' ').toLowerCase();
         if (allItems.includes('month end dinner')) {
@@ -119,8 +143,8 @@ const MessCard = ({ mess }) => {
                             const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
                             const startOfWeek = getStartOfWeek();
                             const isExpired = !lastUpdated || lastUpdated < startOfWeek;
-                            const hasMenu = mess.menu && Object.keys(mess.menu).some(day => {
-                                const dayMenu = mess.menu[day];
+                            const hasMenu = activeMenu && Object.keys(activeMenu).some(day => {
+                                const dayMenu = activeMenu[day];
                                 if (!dayMenu) return false;
                                 return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
                             });
@@ -149,8 +173,8 @@ const MessCard = ({ mess }) => {
                         const lastUpdated = mess.lastUpdated ? new Date(mess.lastUpdated) : null;
                         const startOfWeek = getStartOfWeek();
                         const isExpired = !lastUpdated || lastUpdated < startOfWeek;
-                        const hasMenu = mess.menu && Object.keys(mess.menu).some(day => {
-                            const dayMenu = mess.menu[day];
+                        const hasMenu = activeMenu && Object.keys(activeMenu).some(day => {
+                            const dayMenu = activeMenu[day];
                             if (!dayMenu) return false;
                             return Object.values(dayMenu).some(meal => meal && meal !== "N/A" && meal.trim() !== "");
                         });
@@ -191,7 +215,7 @@ const MessCard = ({ mess }) => {
                                 {/* Daily Menu Preview - Grid Stack for Stable Height */}
                                 <div className="grid grid-cols-1 flex-1 min-h-0">
                                     {days.map(day => {
-                                        const dayMenu = mess.menu[day] || mess.menu['Monday'];
+                                        const dayMenu = activeMenu[day] || activeMenu['Monday'];
                                         const isSelected = selectedDay === day;
 
                                         return (
