@@ -535,9 +535,25 @@ const AdminDashboard = () => {
                                     exit={{ opacity: 0 }}
                                     className="border rounded-2xl p-12 text-center bg-white/50"
                                 >
-                                    <div className="w-24 h-24 mx-auto mb-6 rounded-full skeleton-loader"></div>
-                                    <div className="h-8 w-48 mx-auto mb-4 rounded skeleton-loader"></div>
-                                    <div className="h-4 w-64 mx-auto rounded skeleton-loader"></div>
+                                    <div className="relative w-24 h-24 mx-auto mb-6">
+                                        <div className="absolute inset-0 border-4 border-orange-100 rounded-full"></div>
+                                        <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            {uploadStatus === 'uploading' ? (
+                                                <Upload className="text-orange-500 animate-pulse" size={32} />
+                                            ) : (
+                                                <FileText className="text-orange-500 animate-pulse" size={32} />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                        {uploadStatus === 'uploading' ? 'Uploading Image...' : 'Processing Menu...'}
+                                    </h3>
+                                    <p className="text-gray-500">
+                                        {uploadStatus === 'uploading'
+                                            ? 'Sending to server'
+                                            : 'Extracting menu items...'}
+                                    </p>
                                 </motion.div>
                             )}
 
