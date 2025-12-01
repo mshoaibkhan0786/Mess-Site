@@ -69,7 +69,18 @@ const MessCard = ({ mess }) => {
         'from-pink-500 to-rose-500': { text: 'text-pink-600', shadow: 'hover:shadow-pink-500/40', bg: 'bg-pink-50' }
     };
 
-    const theme = colorMap[mess.color] || colorMap['from-orange-500 to-red-500'];
+    const getTheme = (colorStr) => {
+        if (!colorStr) return colorMap['from-orange-500 to-red-500'];
+
+        if (colorStr.includes('blue') || colorStr.includes('cyan')) return colorMap['from-blue-500 to-cyan-500'];
+        if (colorStr.includes('green') || colorStr.includes('emerald')) return colorMap['from-green-500 to-emerald-500'];
+        if (colorStr.includes('purple')) return colorMap['from-purple-500 to-pink-500'];
+        if (colorStr.includes('pink') || colorStr.includes('rose')) return colorMap['from-pink-500 to-rose-500'];
+
+        return colorMap['from-orange-500 to-red-500'];
+    };
+
+    const theme = getTheme(mess.color);
 
     const toTitleCase = (str) => {
         if (!str) return '';
