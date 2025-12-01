@@ -716,11 +716,11 @@ const AdminDashboard = () => {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium text-gray-900">{log.details}</p>
-                                                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                                                        <span className="font-semibold text-orange-600">{log.adminName || log.adminEmail}</span>
-                                                        {log.adminName && <span className="text-gray-400">({log.adminEmail})</span>}
-                                                        <span>•</span>
-                                                        <span>{new Date(log.timestamp).toLocaleString()}</span>
+                                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-gray-500">
+                                                        <span className="font-semibold text-orange-600 whitespace-nowrap">{log.adminName || log.adminEmail}</span>
+                                                        {log.adminName && <span className="text-gray-400 break-all">({log.adminEmail})</span>}
+                                                        <span className="hidden sm:inline">•</span>
+                                                        <span className="w-full sm:w-auto text-gray-400">{new Date(log.timestamp).toLocaleString()}</span>
                                                     </div>
                                                 </div>
                                             </div>
