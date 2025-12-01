@@ -252,11 +252,16 @@ const AdminDashboard = () => {
                         
                         **CRITICAL INSTRUCTIONS:**
                         1.  **Start Date**: Extract the start date of the menu (e.g., "1st December 2025") and format it as "YYYY-MM-DD" (e.g., "2025-12-01").
-                        2.  **Theme Dinner**: If a meal slot says "Theme Dinner" (or similar), set the value to EXACTLY "Theme Dinner". Do not list other items if it's a theme dinner.
-                        3.  **10-Day Cycle**: 
+                        2.  **EXTRACT EVERY DISH**: You must extract **EVERY SINGLE DISH** listed for each meal.
+                            - **Do NOT summarize.**
+                            - **Do NOT truncate.**
+                            - **List ALL items separated by commas** exactly as they appear in the image.
+                            - If there are multiple items (e.g., "Rice, Dal, Curd, Sweet"), include **ALL** of them.
+                        3.  **Theme Dinner**: If a meal slot says "Theme Dinner" (or similar), set the value to EXACTLY "Theme Dinner". Do not list other items if it's a theme dinner.
+                        4.  **10-Day Cycle**: 
                             - Extract the first 7 days into the "menu" object.
                             - Extract the remaining days (Days 8, 9, 10, etc.) into the "nextWeekMenu" object, mapping them to their respective day names (e.g., if Day 1 is Monday, Day 8 is Monday).
-                        4.  **Dishes**: List every single dish. Sentence case. No ALL CAPS.
+                        5.  **Formatting**: Format all text in **Sentence case** (e.g., "Paneer butter masala"). **No ALL CAPS**.
                         
                         **JSON Structure:**
                         {
